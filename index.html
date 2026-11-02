@@ -1,1 +1,112 @@
 
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yehia Salary Calculator</title>
+<style>
+body {
+  margin: 0;
+  padding: 20px;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+.container {
+  max-width: 450px;
+  margin: 30px auto;
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 20px;
+}
+h1 {text-align:center;color:#38bdf8}
+label {display:block;margin-top:18px}
+input {
+  width:100%;
+  box-sizing:border-box;
+  padding:13px;
+  margin-top:8px;
+  border:0;
+  border-radius:10px;
+  font-size:17px;
+}
+button {
+  width:100%;
+  padding:15px;
+  margin-top:22px;
+  background:#0284c7;
+  color:white;
+  border:0;
+  border-radius:12px;
+  font-size:18px;
+}
+.result {
+  margin-top:20px;
+  padding:18px;
+  background:#0f172a;
+  border-radius:12px;
+  line-height:2;
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>💰 حاسبة المرتب</h1>
+<p style="text-align:center">Yehia Salary Calculator</p>
+
+<label>المرتب الأساسي بالجنيه</label>
+<input id="salary" type="number" placeholder="مثلاً 6000">
+
+<label>عدد أيام العمل بالشهر</label>
+<input id="days" type="number" value="26">
+
+<label>ساعات العمل يومياً</label>
+<input id="hours" type="number" value="8">
+
+<label>ساعات الأوفر تايم يومياً</label>
+<input id="ot" type="number" step="0.5" value="1.5">
+
+<label>عدد أيام الأوفر تايم</label>
+<input id="otdays" type="number" value="0">
+
+<label>معامل الأوفر تايم</label>
+<select id="rate" style="width:100%;padding:13px;margin-top:8px;border-radius:10px">
+<option value="1">عادي ×1</option>
+<option value="1.5" selected>×1.5</option>
+<option value="2">×2</option>
+</select>
+
+<button onclick="calculate()">احسب مرتبي</button>
+
+<div class="result" id="result">
+النتيجة هتظهر هنا بعد الحساب
+</div>
+</div>
+
+<script>
+function calculate() {
+ const salary = Number(document.getElementById('salary').value);
+ const days = Number(document.getElementById('days').value);
+ const hours = Number(document.getElementById('hours').value);
+ const ot = Number(document.getElementById('ot').value);
+ const otdays = Number(document.getElementById('otdays').value);
+ const rate = Number(document.getElementById('rate').value);
+
+ if (salary <= 0 || days <= 0 || hours <= 0 || ot < 0 || otdays < 0) {
+  alert('من فضلك راجع البيانات');
+  return;
+ }
+
+ const hourly = salary / (days * hours);
+ const extra = hourly * ot * otdays * rate;
+ const total = salary + extra;
+
+ document.getElementById('result').innerHTML =
+ 'قيمة ساعة العمل: ' + hourly.toFixed(2) + ' جنيه<br>' +
+ 'إجمالي الأوفر تايم: ' + extra.toFixed(2) + ' جنيه<br>' +
+ '<hr>إجمالي المرتب: ' + total.toFixed(2) + ' جنيه';
+}
+</script>
+</body>
+</html>
