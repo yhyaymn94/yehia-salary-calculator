@@ -30,7 +30,7 @@
         ::-webkit-scrollbar-track { background: #0b1120; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
 
-        /* الخلفية الشبكية الفخمة زي الصورة */
+        /* الخلفية الشبكية الفخمة */
         .cyber-bg {
             background-color: #0b1120;
             background-image: 
@@ -40,37 +40,33 @@
             background-position: center center;
         }
 
-        /* Overlay للمدخلات وشاشة الترحيب */
         .auth-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             z-index: 99999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            transition: opacity 0.6s ease;
         }
 
         .splash-logo { font-size: 36px; font-weight: 900; color: #38bdf8; letter-spacing: 3px; margin-bottom: 2px; text-transform: uppercase; text-shadow: 0 0 15px rgba(56, 189, 248, 0.4); }
-        .splash-sub { font-size: 11px; color: #64748b; margin-bottom: 35px; letter-spacing: 2px; text-transform: uppercase; }
-
-        /* دائرة الصورة الشخصية بنفس ستايل الصورة */
+        .splash-sub { font-size: 11px; color: #64748b; margin-bottom: 25px; letter-spacing: 2px; text-transform: uppercase; }
+        
         .welcome-avatar-circle {
             width: 100px; height: 100px; border: 2px solid #38bdf8; border-radius: 50%;
             display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: 700; color: #38bdf8;
             background: rgba(56, 189, 248, 0.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
-            margin-bottom: 15px; overflow: hidden;
+            margin-bottom: 15px; overflow: hidden; margin-left: auto; margin-right: auto;
         }
         .welcome-avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* شريط التحميل السفلي */
         .loading-bar { width: 160px; height: 3px; background: #1e293b; border-radius: 3px; overflow: hidden; margin-top: 20px; margin-left: auto; margin-right: auto; }
         .loading-progress { width: 0%; height: 100%; background: #38bdf8; animation: loadAnim 2s forwards; }
         @keyframes loadAnim { 0% { width: 0%; } 100% { width: 100%; } }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between">
 
-    <!-- شاشة تسجيل الدخول والترحيب (نفس خلفية الشبكة في صورتك) -->
+    <!-- شاشة تسجيل الدخول والترحيب المحمية -->
     <div id="auth-modal" class="auth-overlay cyber-bg">
         
-        <!-- نموذج تسجيل الدخول -->
+        <!-- صندوق تسجيل الدخول -->
         <div id="auth-box" class="w-full max-w-sm mx-4 p-8 rounded-3xl bg-slate-900/90 backdrop-blur-md border border-slate-800 shadow-2xl text-center">
             <div class="splash-logo">OverShift ⚡</div>
             <div class="splash-sub">Yehia Ayman • Productivity</div>
@@ -87,6 +83,13 @@
                     <label class="block text-xs font-bold text-slate-300 mb-1">كلمة المرور</label>
                     <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-bold focus:ring-2 focus:ring-sky-500 outline-none text-sm">
                 </div>
+                
+                <!-- كود التصريح السري لإنشاء حساب جديد -->
+                <div id="secret-key-container" class="hidden">
+                    <label class="block text-xs font-bold text-amber-400 mb-1">كود التصريح السري (3092007)</label>
+                    <input type="password" id="auth-secret-key" placeholder="أدخل كود التصريح" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-amber-500/50 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                </div>
+
                 <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs tracking-wider uppercase">
                     دخول إلى لوحة التحكم
                 </button>
@@ -98,7 +101,7 @@
             </div>
         </div>
 
-        <!-- شاشة الـ Welcome الفخمة (بنفس الستايل الدائري في صورتك) -->
+        <!-- شاشة الـ Welcome الدائرية الفخمة -->
         <div id="welcome-box" class="hidden flex flex-col items-center text-center">
             <div class="splash-logo">OverShift ⚡</div>
             <div class="splash-sub">Yehia Ayman • Productivity</div>
@@ -385,12 +388,14 @@
         <div class="max-w-7xl mx-auto px-4 space-y-2">
             <p class="font-medium">حاسبة المرتبات والشيفتات اليومية - OverShift</p>
             <p class="text-slate-500 flex items-center justify-center gap-1">
-                جميع الحقوق محفوظة © 2026 | تصميم وتطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
+                جميع الحقوق محفوظة © 2026 | تطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
             </p>
         </div>
     </footer>
 
     <script>
+        const MASTER_CREATION_KEY = "3092007"; 
+
         let currentUser = null;
         let isRegisterMode = false;
         let baseSalary = 6000;
@@ -400,12 +405,17 @@
         let isDarkMode = true;
 
         window.addEventListener('load', () => {
+            // للتأكد إن شاشة الدخول تظهر دائماً حتى لو كان مسجل دخول، امسح السطر ده لو مش عايزه
+            // هنخليها تعرض شاشة الدخول أول ما يفتح لو مش عامل تسجيل خروج صحيح
             const loggedInUser = localStorage.getItem('current_active_user');
-            if (loggedInUser) {
+            if (!loggedInUser) {
+                document.getElementById('auth-modal').style.display = 'flex';
+            } else {
                 currentUser = loggedInUser;
                 loadUserData(currentUser);
                 document.getElementById('auth-modal').style.display = 'none';
             }
+
             initDatePicker();
             updateEgyptTime();
             setInterval(updateEgyptTime, 1000);
@@ -420,19 +430,22 @@
             const submitBtn = document.getElementById('auth-submit-btn');
             const switchText = document.getElementById('auth-switch-text');
             const switchBtn = document.getElementById('auth-switch-btn');
+            const secretContainer = document.getElementById('secret-key-container');
 
             if (isRegisterMode) {
                 title.textContent = 'إنشاء حساب جديد';
-                desc.textContent = 'سجل اسم المستخدم وكلمة مرور خاصة بك';
+                desc.textContent = 'مطلوب كود التصريح (3092007) لإنشاء حساب جديد';
                 submitBtn.textContent = 'تسجيل وإنشاء الحساب';
                 switchText.textContent = 'لديك حساب بالفعل؟';
                 switchBtn.textContent = 'تسجيل الدخول';
+                secretContainer.classList.remove('hidden');
             } else {
                 title.textContent = 'تسجيل الدخول';
                 desc.textContent = 'أدخل اسم المستخدم وكلمة المرور لمتابعة شيفتاتك';
                 submitBtn.textContent = 'دخول إلى لوحة التحكم';
                 switchText.textContent = 'ليس لديك حساب؟';
                 switchBtn.textContent = 'انشئ حساب جديد';
+                secretContainer.classList.add('hidden');
             }
         }
 
@@ -446,6 +459,12 @@
             let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
 
             if (isRegisterMode) {
+                const secretKeyInput = document.getElementById('auth-secret-key').value;
+                if (secretKeyInput !== MASTER_CREATION_KEY) {
+                    alert('❌ كود التصريح السري غير صحيح! لا يمكنك إنشاء حساب جديد.');
+                    return;
+                }
+
                 if (usersDB[username]) {
                     alert('❌ اسم المستخدم موجود بالفعل، اختر اسم آخر أو قم بتسجيل الدخول.');
                     return;
@@ -469,7 +488,7 @@
             localStorage.setItem('current_active_user', currentUser);
             loadUserData(currentUser);
 
-            // إخفاء صندوق الفورم وإظهار صندوق الـ Welcome الدائري بنفس الاستايل
+            // إخفاء صندوق الدخول وإظهار واجهة الـ Welcome الدائرية الفخمة فوراً
             const authBox = document.getElementById('auth-box');
             const welcomeBox = document.getElementById('welcome-box');
             const welcomeName = document.getElementById('welcome-user-name');
@@ -485,7 +504,7 @@
                 welcomeAvatarContainer.innerHTML = `<span>${username.substring(0, 2).toUpperCase()}</span>`;
             }
 
-            // الانتظار ثانيتين ثم إخفاء شاشة الـ Splash بالكامل ودخول اللوحة
+            // الانتظار ثانيتين وشريط التحميل يكتمل ثم فتح اللوحة
             setTimeout(() => {
                 const modal = document.getElementById('auth-modal');
                 modal.style.opacity = '0';
@@ -727,7 +746,6 @@
             renderSummaryAndTable();
         };
 
-        document.getElementById('clear-all-df') // safe fallback
         document.getElementById('clear-all-btn').addEventListener('click', function() {
             if (shiftLogs.length === 0) return;
             shiftLogs = [];
