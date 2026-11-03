@@ -84,10 +84,10 @@
                     <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-bold focus:ring-2 focus:ring-sky-500 outline-none text-sm">
                 </div>
                 
-                <!-- كود التصريح السري لإنشاء حساب جديد -->
+                <!-- كود التصريح السري لإنشاء حساب جديد (مخفي الرقم تماماً) -->
                 <div id="secret-key-container" class="hidden">
-                    <label class="block text-xs font-bold text-amber-400 mb-1">كود التصريح السري (3092007)</label>
-                    <input type="password" id="auth-secret-key" placeholder="أدخل كود التصريح" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-amber-500/50 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none text-sm">
+                    <label class="block text-xs font-bold text-amber-400 mb-1">كود التصريح السري لإنشاء الحساب</label>
+                    <input type="password" id="auth-secret-key" placeholder="أدخل الكود المعتمد" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-amber-500/50 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none text-sm">
                 </div>
 
                 <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs tracking-wider uppercase">
@@ -388,7 +388,7 @@
         <div class="max-w-7xl mx-auto px-4 space-y-2">
             <p class="font-medium">حاسبة المرتبات والشيفتات اليومية - OverShift</p>
             <p class="text-slate-500 flex items-center justify-center gap-1">
-                جميع الحقوق محفوظة © 2026 | تطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
+                جميع الحقوق محفوظة © 2026 | تصميم وتطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
             </p>
         </div>
     </footer>
@@ -405,8 +405,6 @@
         let isDarkMode = true;
 
         window.addEventListener('load', () => {
-            // للتأكد إن شاشة الدخول تظهر دائماً حتى لو كان مسجل دخول، امسح السطر ده لو مش عايزه
-            // هنخليها تعرض شاشة الدخول أول ما يفتح لو مش عامل تسجيل خروج صحيح
             const loggedInUser = localStorage.getItem('current_active_user');
             if (!loggedInUser) {
                 document.getElementById('auth-modal').style.display = 'flex';
@@ -434,7 +432,7 @@
 
             if (isRegisterMode) {
                 title.textContent = 'إنشاء حساب جديد';
-                desc.textContent = 'مطلوب كود التصريح (3092007) لإنشاء حساب جديد';
+                desc.textContent = 'مطلوب كود التصريح السري لإنشاء حساب جديد';
                 submitBtn.textContent = 'تسجيل وإنشاء الحساب';
                 switchText.textContent = 'لديك حساب بالفعل؟';
                 switchBtn.textContent = 'تسجيل الدخول';
@@ -488,7 +486,6 @@
             localStorage.setItem('current_active_user', currentUser);
             loadUserData(currentUser);
 
-            // إخفاء صندوق الدخول وإظهار واجهة الـ Welcome الدائرية الفخمة فوراً
             const authBox = document.getElementById('auth-box');
             const welcomeBox = document.getElementById('welcome-box');
             const welcomeName = document.getElementById('welcome-user-name');
@@ -504,7 +501,6 @@
                 welcomeAvatarContainer.innerHTML = `<span>${username.substring(0, 2).toUpperCase()}</span>`;
             }
 
-            // الانتظار ثانيتين وشريط التحميل يكتمل ثم فتح اللوحة
             setTimeout(() => {
                 const modal = document.getElementById('auth-modal');
                 modal.style.opacity = '0';
@@ -623,6 +619,22 @@
             document.getElementById('entry-date').value = `${year}-${month}-${day}`;
         }
 
+        function calculateRates() {
+            const dailyRate = baseSalary / 26;
+            const hourlyRate = dailyRate / 8;
+            return { dailyRate, hourlyRate };
+        }
+
+        function updateEntryPreview() {
+            const { hourlyRate } = calculateRatees(); // fallback fix
+            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
+            const rateMultiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
+            
+            const previewAmount = hours * hourlyRate * rateMultiplier;
+            document.getElementById('entry-preview-amount').textContent = previewAmount.toFixed(2) + ' ج.م';
+        }
+
+        // دالة آمنة لحساب المعدلات
         function calculateRates() {
             const dailyRate = baseSalary / 26;
             const hourlyRate = dailyRate / 8;
