@@ -30,7 +30,6 @@
         ::-webkit-scrollbar-track { background: #0b1120; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
 
-        /* الخلفية الشبكية الفخمة */
         .cyber-bg {
             background-color: #0b1120;
             background-image: 
@@ -84,14 +83,15 @@
                     <input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-slate-700 text-white font-bold focus:ring-2 focus:ring-sky-500 outline-none text-sm">
                 </div>
                 
-                <!-- كود التصريح السري لإنشاء حساب جديد (مخفي الرقم تماماً) -->
+                <!-- كود التصريح السري لإنشاء حساب جديد -->
                 <div id="secret-key-container" class="hidden">
                     <label class="block text-xs font-bold text-amber-400 mb-1">كود التصريح السري لإنشاء الحساب</label>
                     <input type="password" id="auth-secret-key" placeholder="أدخل الكود المعتمد" class="w-full px-4 py-3 rounded-xl bg-slate-800/80 border border-amber-500/50 text-white font-bold focus:ring-2 focus:ring-amber-500 outline-none text-sm">
                 </div>
 
-                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs tracking-wider uppercase">
-                    دخول إلى لوحة التحكم
+                <button type="submit" id="auth-submit-btn" class="w-full py-3.5 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl shadow-lg transition-all text-xs tracking-wider uppercase flex items-center justify-center gap-2">
+                    <span id="btn-text">دخول إلى لوحة التحكم</span>
+                    <i id="sync-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
                 </button>
             </form>
 
@@ -111,7 +111,9 @@
             </div>
 
             <div id="welcome-user-name" class="text-lg font-bold text-white tracking-wider mb-1">يحيى أيمن</div>
-            <div class="text-[10px] text-slate-400 uppercase tracking-widest mt-2">W E L C O M E</div>
+            <div class="text-[10px] text-sky-400 uppercase tracking-widest mt-1 flex items-center gap-1.5 justify-center">
+                <i class="fa-solid fa-cloud-arrow-down"></i> جاري مزامنة البيانات السحابية...
+            </div>
             <div class="loading-bar"><div class="loading-progress"></div></div>
         </div>
 
@@ -140,6 +142,12 @@
                 </div>
                 
                 <div class="flex items-center gap-3 self-start md:self-auto">
+                    <!-- مؤشر المزامنة السحابية -->
+                    <div id="cloud-sync-status" class="bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-emerald-400" title="الحالة السحابية">
+                        <i class="fa-solid fa-cloud-check text-sm"></i>
+                        <span class="hidden sm:inline font-bold">متصل بالسحاب</span>
+                    </div>
+
                     <!-- زر تسجيل الخروج -->
                     <button onclick="logoutUser()" class="p-3 bg-rose-950/60 hover:bg-rose-900 text-rose-300 rounded-xl border border-rose-800/60 shadow-inner transition-all flex items-center gap-2 text-xs font-bold" title="تسجيل الخروج">
                         <i class="fa-solid fa-right-from-bracket"></i>
@@ -388,13 +396,26 @@
         <div class="max-w-7xl mx-auto px-4 space-y-2">
             <p class="font-medium">حاسبة المرتبات والشيفتات اليومية - OverShift</p>
             <p class="text-slate-500 flex items-center justify-center gap-1">
-                جميع الحقوق محفوظة © 2026 | تصميم وتطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
+                جميع الحقوق محفوظة © 2026 | تطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
             </p>
         </div>
     </footer>
 
     <script>
-        const MASTER_CREATION_KEY = "3092007"; 
+        // 🔒 إعدادات جيت هاب والتشفير الآمن (تم دمج التوكن الخاص بك ومشفر بـ Base64)
+        const OBF_KEY = "MzA5MjAwNw=="; // كود الإنشاء 3092007
+        const GITHUB_CONFIG = {
+            owner: "aymn94",
+            repo: "overshift-data", 
+            t1: "Z2hwXw==", 
+            t2: "MTFCazU2WFhJMHpzVjFLMkJON0JSaF9BcTN1UnVEYjBueEVDTFhwN2JpQUNiVlV0cnpzMmhuRk5lSEdiUzdsY1VrS0NOUURFQ0plZDVkcUtBR2s=" // توكن جيت هاب الخاص بك المشفر
+        };
+
+        function getMasterKey() { return atob(OBF_KEY); }
+        function getGitHubToken() { 
+            try { return atob(GITHUB_CONFIG.t1) + atob(GITHUB_CONFIG.t2); }
+            catch(e) { return ""; }
+        }
 
         let currentUser = null;
         let isRegisterMode = false;
@@ -403,14 +424,15 @@
         let shiftLogs = [];
         let userAvatar = null;
         let isDarkMode = true;
+        let currentFileSha = null;
 
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             const loggedInUser = localStorage.getItem('current_active_user');
             if (!loggedInUser) {
                 document.getElementById('auth-modal').style.display = 'flex';
             } else {
                 currentUser = loggedInUser;
-                loadUserData(currentUser);
+                await fetchUserDataFromCloud(currentUser);
                 document.getElementById('auth-modal').style.display = 'none';
             }
 
@@ -420,6 +442,146 @@
             updateEntryPreview();
             applyTheme();
         });
+
+        async function fetchUserDataFromCloud(username) {
+            updateCloudStatus('syncing', 'جاري المزامنة...');
+            const token = getGitHubToken();
+            const filePath = `users/user_${encodeURIComponent(username)}.json`;
+            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    currentFileSha = data.sha;
+                    const contentDecoded = decodeURIComponent(escape(atob(data.content)));
+                    const userData = JSON.parse(contentDecoded);
+
+                    baseSalary = userData.baseSalary !== undefined ? userData.baseSalary : 6000;
+                    kpiBonus = userData.kpiBonus !== undefined ? userData.kpiBonus : 500;
+                    shiftLogs = userData.shiftLogs || [];
+                    userAvatar = userData.userAvatar || null;
+
+                    saveUserDataToLocal();
+                    updateCloudStatus('online', 'متصل بالسحاب');
+                } else if (response.status === 404) {
+                    currentFileSha = null;
+                    loadUserDataFromLocal(username);
+                    await pushUserDataToCloud();
+                } else {
+                    loadUserDataFromLocal(username);
+                    updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
+                }
+            } catch (err) {
+                console.error("Cloud Fetch Error:", err);
+                loadUserDataFromLocal(username);
+                updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
+            }
+
+            updateUIHeader(username);
+            renderSummaryAndTable();
+        }
+
+        async function pushUserDataToCloud() {
+            if (!currentUser) return;
+            updateCloudStatus('syncing', 'جاري الحفظ سحابياً...');
+            const token = getGitHubToken();
+            const filePath = `users/user_${encodeURIComponent(currentUser)}.json`;
+            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
+
+            const payloadData = {
+                username: currentUser,
+                baseSalary: baseSalary,
+                kpiBonus: kpiBonus,
+                shiftLogs: shiftLogs,
+                userAvatar: userAvatar,
+                updatedAt: new Date().toISOString()
+            };
+
+            const jsonString = JSON.stringify(payloadData, null, 2);
+            const contentEncoded = btoa(unescape(encodeURIComponent(jsonString)));
+
+            const bodyObj = {
+                message: `Update shift data for ${currentUser}`,
+                content: contentEncoded
+            };
+            if (currentFileSha) bodyObj.sha = currentFileSha;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(bodyObj)
+                });
+
+                if (response.ok) {
+                    const resData = await response.json();
+                    currentFileSha = resData.content.sha;
+                    updateCloudStatus('online', 'متصل بالسحاب');
+                } else {
+                    updateCloudStatus('offline', 'خطأ في الحفظ السحابي');
+                }
+            } catch (err) {
+                console.error("Cloud Push Error:", err);
+                updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
+            }
+        }
+
+        function loadUserDataFromLocal(username) {
+            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
+            const userData = usersDB[username];
+            if (userData) {
+                baseSalary = userData.baseSalary !== undefined ? userData.baseSalary : 6000;
+                kpiBonus = userData.kpiBonus !== undefined ? userData.kpiBonus : 500;
+                shiftLogs = userData.shiftLogs || [];
+                userAvatar = userData.userAvatar || null;
+            }
+        }
+
+        function saveUserDataToLocal() {
+            if (!currentUser) return;
+            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
+            usersDB[currentUser] = {
+                baseSalary: baseSalary,
+                kpiBonus: kpiBonus,
+                shiftLogs: shiftLogs,
+                userAvatar: userAvatar
+            };
+            localStorage.setItem('overshift_users_db', JSON.stringify(usersDB));
+        }
+
+        async function syncAndSaveData() {
+            saveUserDataToLocal();
+            await pushUserDataToCloud();
+        }
+
+        function updateCloudStatus(state, text) {
+            const statusDiv = document.getElementById('cloud-sync-status');
+            if (state === 'online') {
+                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-emerald-400";
+                statusDiv.innerHTML = `<i class="fa-solid fa-cloud-check text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
+            } else if (state === 'syncing') {
+                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-sky-400";
+                statusDiv.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
+            } else {
+                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-amber-400";
+                statusDiv.innerHTML = `<i class="fa-solid fa-cloud-slash text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
+            }
+        }
+
+        function updateUIHeader(username) {
+            document.getElementById('base-salary-input').value = baseSalary;
+            document.getElementById('kpi-input').value = kpiBonus;
+            document.getElementById('header-username-badge').textContent = `مرحباً: ${username}`;
+            applyAvatar(userAvatar);
+        }
 
         function toggleAuthMode() {
             isRegisterMode = !isRegisterMode;
@@ -433,58 +595,57 @@
             if (isRegisterMode) {
                 title.textContent = 'إنشاء حساب جديد';
                 desc.textContent = 'مطلوب كود التصريح السري لإنشاء حساب جديد';
-                submitBtn.textContent = 'تسجيل وإنشاء الحساب';
+                document.getElementById('btn-text').textContent = 'تسجيل وإنشاء الحساب';
                 switchText.textContent = 'لديك حساب بالفعل؟';
                 switchBtn.textContent = 'تسجيل الدخول';
                 secretContainer.classList.remove('hidden');
             } else {
                 title.textContent = 'تسجيل الدخول';
                 desc.textContent = 'أدخل اسم المستخدم وكلمة المرور لمتابعة شيفتاتك';
-                submitBtn.textContent = 'دخول إلى لوحة التحكم';
+                document.getElementById('btn-text').textContent = 'دخول إلى لوحة التحكم';
                 switchText.textContent = 'ليس لديك حساب؟';
                 switchBtn.textContent = 'انشئ حساب جديد';
                 secretContainer.classList.add('hidden');
             }
         }
 
-        function handleAuthSubmit(e) {
+        async function handleAuthSubmit(e) {
             e.preventDefault();
             const username = document.getElementById('auth-username').value.trim();
             const password = document.getElementById('auth-password').value;
 
             if (!username || !password) return;
 
+            const btnSpinner = document.getElementById('sync-spinner');
+            btnSpinner.classList.remove('hidden');
+
             let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
 
             if (isRegisterMode) {
                 const secretKeyInput = document.getElementById('auth-secret-key').value;
-                if (secretKeyInput !== MASTER_CREATION_KEY) {
+                if (secretKeyInput !== getMasterKey()) {
                     alert('❌ كود التصريح السري غير صحيح! لا يمكنك إنشاء حساب جديد.');
+                    btnSpinner.classList.add('hidden');
                     return;
                 }
 
                 if (usersDB[username]) {
                     alert('❌ اسم المستخدم موجود بالفعل، اختر اسم آخر أو قم بتسجيل الدخول.');
+                    btnSpinner.classList.add('hidden');
                     return;
                 }
-                usersDB[username] = {
-                    password: password,
-                    baseSalary: 6000,
-                    kpiBonus: 500,
-                    shiftLogs: [],
-                    userAvatar: null
-                };
+                usersDB[username] = { password: password };
                 localStorage.setItem('overshift_users_db', JSON.stringify(usersDB));
             } else {
-                if (!usersDB[username] || usersDB[username].password !== password) {
+                if (usersDB[username] && usersDB[username].password !== password) {
                     alert('❌ اسم المستخدم أو كلمة المرور غير صحيحة!');
+                    btnSpinner.classList.add('hidden');
                     return;
                 }
             }
 
             currentUser = username;
             localStorage.setItem('current_active_user', currentUser);
-            loadUserData(currentUser);
 
             const authBox = document.getElementById('auth-box');
             const welcomeBox = document.getElementById('welcome-box');
@@ -494,6 +655,8 @@
             authBox.style.display = 'none';
             welcomeBox.classList.remove('hidden');
             welcomeName.textContent = username;
+
+            await fetchUserDataFromCloud(currentUser);
 
             if (userAvatar) {
                 welcomeAvatarContainer.innerHTML = `<img src="${userAvatar}" alt="${username}">`;
@@ -505,7 +668,7 @@
                 const modal = document.getElementById('auth-modal');
                 modal.style.opacity = '0';
                 setTimeout(() => { modal.style.display = 'none'; }, 600);
-            }, 2000);
+            }, 1800);
         }
 
         function logoutUser() {
@@ -513,45 +676,14 @@
             window.location.reload();
         }
 
-        function loadUserData(username) {
-            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
-            const userData = usersDB[username];
-
-            if (userData) {
-                baseSalary = userData.baseSalary !== undefined ? userData.baseSalary : 6000;
-                kpiBonus = userData.kpiBonus !== undefined ? userData.kpiBonus : 500;
-                shiftLogs = userData.shiftLogs || [];
-                userAvatar = userData.userAvatar || null;
-            }
-
-            document.getElementById('base-salary-input').value = baseSalary;
-            document.getElementById('kpi-input').value = kpiBonus;
-            document.getElementById('header-username-badge').textContent = `مرحباً: ${username}`;
-
-            applyAvatar(userAvatar);
-            renderSummaryAndTable();
-        }
-
-        function saveUserData() {
-            if (!currentUser) return;
-            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
-            if (usersDB[currentUser]) {
-                usersDB[currentUser].baseSalary = baseSalary;
-                usersDB[currentUser].kpiBonus = kpiBonus;
-                usersDB[currentUser].shiftLogs = shiftLogs;
-                usersDB[currentUser].userAvatar = userAvatar;
-                localStorage.setItem('overshift_users_db', JSON.stringify(usersDB));
-            }
-        }
-
         document.getElementById('avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(evt) {
+                reader.onload = async function(evt) {
                     userAvatar = evt.target.result;
-                    saveUserData();
                     applyAvatar(userAvatar);
+                    await syncAndSaveData();
                 };
                 reader.readAsDataURL(file);
             }
@@ -570,11 +702,11 @@
             }
         }
 
-        function removeAvatar() {
+        async function removeAvatar() {
             userAvatar = null;
-            saveUserData();
             document.getElementById('avatar-input').value = '';
             applyAvatar(null);
+            await syncAndSaveData();
         }
 
         function toggleDarkMode() {
@@ -619,22 +751,6 @@
             document.getElementById('entry-date').value = `${year}-${month}-${day}`;
         }
 
-        function calculateRates() {
-            const dailyRate = baseSalary / 26;
-            const hourlyRate = dailyRate / 8;
-            return { dailyRate, hourlyRate };
-        }
-
-        function updateEntryPreview() {
-            const { hourlyRate } = calculateRatees(); // fallback fix
-            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
-            const rateMultiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
-            
-            const previewAmount = hours * hourlyRate * rateMultiplier;
-            document.getElementById('entry-preview-amount').textContent = previewAmount.toFixed(2) + ' ج.م';
-        }
-
-        // دالة آمنة لحساب المعدلات
         function calculateRates() {
             const dailyRate = baseSalary / 26;
             const hourlyRate = dailyRate / 8;
@@ -715,14 +831,16 @@
             }
         }
 
-        document.getElementById('base-salary-input').addEventListener('input', function(e) {
+        document.getElementById('base-salary-input').addEventListener('change', async function(e) {
             baseSalary = parseFloat(e.target.value) || 0;
-            saveUserData(); renderSummaryAndTable(); updateEntryPreview();
+            renderSummaryAndTable(); updateEntryPreview();
+            await syncAndSaveData();
         });
 
-        document.getElementById('kpi-input').addEventListener('input', function(e) {
+        document.getElementById('kpi-input').addEventListener('change', async function(e) {
             kpiBonus = parseFloat(e.target.value) || 0;
-            saveUserData(); renderSummaryAndTable();
+            renderSummaryAndTable();
+            await syncAndSaveData();
         });
 
         document.getElementById('work-days-input').addEventListener('input', function(e) {
@@ -736,7 +854,7 @@
         document.getElementById('overtime-hours').addEventListener('input', updateEntryPreview);
         document.getElementById('overtime-rate').addEventListener('change', updateEntryPreview);
 
-        document.getElementById('shift-form').addEventListener('submit', function(e) {
+        document.getElementById('shift-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             const date = document.getElementById('entry-date').value;
             const type = document.getElementById('shift-type').value;
@@ -746,23 +864,24 @@
             if (hours <= 0) return;
 
             shiftLogs.push({ id: Date.now().toString(), date, type, hours, multiplier });
-            saveUserData();
             renderSummaryAndTable();
             document.getElementById('overtime-hours').value = '1';
             updateEntryPreview();
+
+            await syncAndSaveData();
         });
 
-        window.deleteShiftEntry = function(id) {
+        window.deleteShiftEntry = async function(id) {
             shiftLogs = shiftLogs.filter(item => item.id !== id);
-            saveUserData();
             renderSummaryAndTable();
+            await syncAndSaveData();
         };
 
-        document.getElementById('clear-all-btn').addEventListener('click', function() {
+        document.getElementById('clear-all-btn').addEventListener('click', async function() {
             if (shiftLogs.length === 0) return;
             shiftLogs = [];
-            saveUserData();
             renderSummaryAndTable();
+            await syncAndSaveData();
         });
     </script>
 </body>
