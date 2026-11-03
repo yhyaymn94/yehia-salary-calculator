@@ -2,237 +2,553 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yehia Finance | Salary Dashboard</title>
-<style>
-*{box-sizing:border-box}
-body{
-margin:0;background:#101010;color:#f5f5f5;
-font-family:Arial,sans-serif;padding:18px;
-}
-.container{max-width:650px;margin:auto}
-.header{
-display:flex;justify-content:space-between;
-align-items:center;margin:12px 0 25px;
-}
-h1{font-size:23px;color:#e8bd62;margin:0}
-small{color:#999}
-.card{
-background:#1c1c1c;border:1px solid #333;
-border-radius:17px;padding:19px;margin-bottom:16px;
-}
-.gold{color:#e8bd62}
-.total{
-background:linear-gradient(135deg,#292318,#171717);
-border:1px solid #a88743;
-}
-.total h2{font-size:32px;color:#f0ca75;margin:12px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-label{display:block;color:#bbb;font-size:13px;margin-bottom:8px}
-input,select{
-width:100%;padding:13px;background:#111;
-color:white;border:1px solid #444;
-border-radius:10px;font-size:16px;
-}
-input:focus,select:focus{outline:1px solid #e8bd62}
-.field{margin-bottom:15px}
-button{
-width:100%;padding:15px;border:0;
-border-radius:11px;background:#d5ad57;
-color:#151515;font-weight:bold;font-size:17px;
-cursor:pointer;margin-top:7px;
-}
-.result-row{
-display:flex;justify-content:space-between;
-padding:10px 0;border-bottom:1px solid #333;
-gap:10px;
-}
-.result-row:last-child{border:0}
-.green{color:#65d69b}
-.red{color:#ff7777}
-.history-item{
-padding:12px 0;border-bottom:1px solid #333;
-font-size:14px;color:#ccc;
-}
-.footer{text-align:center;color:#777;padding:20px;font-size:12px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة المرتب والشيفتات وساعات الإضافي - مصر</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body>
-<div class="container">
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
 
-<header class="header">
-<div>
-<h1>YEHIA FINANCE</h1>
-<small>Salary Management Dashboard</small>
-</div>
-<div class="gold">✦ PREMIUM</div>
-</header>
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-slate-900 via-brand-800 to-slate-900 text-white shadow-lg border-b border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
+                        <i class="fa-solid font-bold fa-calculator text-sky-400"></i>
+                        حاسبة المرتب والشيفتات الشهري
+                    </h1>
+                    <p class="text-sm text-slate-300 mt-1">نظام حساب الساعات الإضافية (ساعة ونص / ساعتين) بتوقيت مصر</p>
+                </div>
+                
+                <!-- Live Egypt Clock Widget -->
+                <div class="bg-slate-800/80 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-4 self-start md:self-auto">
+                    <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-lg">
+                        <i class="fa-regular fa-clock text-xl sm:text-2xl"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">التوقيت المحلي في مصر</div>
+                        <div id="egypt-time" class="text-base sm:text-lg font-bold text-sky-300 font-mono">--:--:-- --</div>
+                        <div id="egypt-date" class="text-xs text-slate-300">-- --- ----</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-<div class="card total">
-<small>صافي المرتب المتوقع</small>
-<h2 id="total">0.00 EGP</h2>
-<small>المرتب الأساسي + الإضافي - الخصومات</small>
-</div>
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow">
+        
+        <!-- Summary Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Card 1: Base Salary -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-slate-500">المرتب الأساسي</span>
+                    <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm"><i class="fa-solid fa-money-bill-wave"></i></span>
+                </div>
+                <div class="text-2xl font-extrabold text-slate-900" id="card-base-salary">6,000 ج.م</div>
+                <div class="text-xs text-slate-400 mt-1">معدل اليوم: <span id="card-daily-rate" class="font-semibold text-slate-600">214.29 ج.م</span></div>
+            </div>
 
-<div class="grid">
-<div class="card">
-<small>المرتب الأساسي</small>
-<h3 id="baseView">0 EGP</h3>
-</div>
-<div class="card">
-<small>إجمالي الأوفر تايم</small>
-<h3 class="green" id="otView">0 EGP</h3>
-</div>
-</div>
+            <!-- Card 2: Hourly Rate -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-slate-500">أجر الساعة الأساسي</span>
+                    <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm"><i class="fa-solid fa-stopwatch"></i></span>
+                </div>
+                <div class="text-2xl font-extrabold text-slate-900" id="card-hourly-rate">26.79 ج.م</div>
+                <div class="text-xs text-slate-400 mt-1">على أساس <span id="card-hours-per-day" class="font-semibold text-slate-600">8 ساعات/يوم</span></div>
+            </div>
 
-<div class="card">
-<h3 class="gold">01 — بيانات المرتب</h3>
+            <!-- Card 3: Total Overtime Bonus -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-slate-500">إجمالي قيمة الإضافي</span>
+                    <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                </div>
+                <div class="text-2xl font-extrabold text-emerald-600" id="card-total-overtime-pay">0.00 ج.م</div>
+                <div class="text-xs text-slate-400 mt-1">إجمالي الساعات: <span id="card-total-overtime-hours" class="font-semibold text-slate-600">0 ساعة</span></div>
+            </div>
 
-<div class="field">
-<label>المرتب الأساسي بالجنيه</label>
-<input id="salary" type="number" min="0" placeholder="مثلاً 6000">
-</div>
+            <!-- Card 4: Net Salary -->
+            <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-sky-200">الصافي المستحق</span>
+                    <span class="p-2 bg-white/10 text-sky-300 rounded-lg text-sm"><i class="fa-solid fa-wallet"></i></span>
+                </div>
+                <div class="text-3xl font-extrabold text-white" id="card-net-salary">6,000 ج.م</div>
+                <div class="text-xs text-sky-200/80 mt-1">شامل المرتب الأساسي والإضافي</div>
+            </div>
+        </div>
 
-<div class="grid">
-<div class="field">
-<label>أيام العمل بالشهر</label>
-<input id="days" type="number" min="1" value="26">
-</div>
-<div class="field">
-<label>ساعات العمل يومياً</label>
-<input id="hours" type="number" min="1" value="8">
-</div>
-</div>
-</div>
+        <!-- Controls Section: Settings & Shift Input -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+            
+            <!-- Left Side: Basic Calculator Settings (4 Cols) -->
+            <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
+                <h2 class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-brand-600"></i>
+                    إعدادات المرتب الشهرية
+                </h2>
 
-<div class="card">
-<h3 class="gold">02 — الأوفر تايم</h3>
+                <div class="space-y-4">
+                    <!-- Base Salary Input -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">المرتب الشهري (جنيه)</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <input type="number" id="base-salary-input" value="6000" min="0" step="100" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ج.م</div>
+                        </div>
+                    </div>
 
-<div class="grid">
-<div class="field">
-<label>ساعات إضافية يومياً</label>
-<input id="otHours" type="number" min="0" step="0.5" value="0">
-</div>
-<div class="field">
-<label>عدد أيام الإضافي</label>
-<input id="otDays" type="number" min="0" value="0">
-</div>
-</div>
+                    <!-- Work Days Input -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">عدد أيام العمل في الشهر</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <input type="number" id="work-days-input" value="28" min="1" max="31" class="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">يوم</div>
+                        </div>
+                    </div>
 
-<div class="field">
-<label>معامل الأوفر تايم</label>
-<select id="rate">
-<option value="1">عادي ×1</option>
-<option value="1.5" selected>×1.5</option>
-<option value="2">×2</option>
-</select>
-</div>
-</div>
+                    <!-- Daily Shift Hours Input -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">ساعات الشيفت الأساسي اليومي</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <input type="number" id="shift-hours-input" value="8" min="1" max="24" class="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ساعة</div>
+                        </div>
+                    </div>
 
-<div class="card">
-<h3 class="gold">03 — الخصومات والتأخير</h3>
+                    <!-- Informational Box -->
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600 leading-relaxed">
+                        <i class="fa-solid fa-circle-info text-brand-600 ml-1"></i>
+                        يتم حساب قيمة الساعة تلقائياً: <br>
+                        <strong class="text-slate-800">قيمة اليوم = المرتب ÷ أيام العمل</strong><br>
+                        <strong class="text-slate-800">قيمة الساعة = قيمة اليوم ÷ ساعات الشيفت</strong>
+                    </div>
+                </div>
+            </div>
 
-<div class="field">
-<label>خصومات أخرى بالجنيه</label>
-<input id="deductions" type="number" min="0" value="0">
-</div>
+            <!-- Right Side: Shift Logger Form (8 Cols) -->
+            <div class="lg:col-span-8 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-plus text-brand-600"></i>
+                    تسجيل شيفت / وقت إضافي جديد
+                </h2>
 
-<div class="field">
-<label>ساعات التأخير</label>
-<input id="late" type="number" min="0" step="0.5" value="0">
-</div>
-</div>
+                <form id="shift-form" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Date Input -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">تاريخ اليوم</label>
+                            <input type="date" id="entry-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 transition-all">
+                        </div>
 
-<button onclick="calculate()">احسب صافي المرتب</button>
+                        <!-- Shift Type Selection -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">نوع الشيفت</label>
+                            <select id="shift-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-semibold transition-all">
+                                <option value="Morning">☀️ شيفت صباحي (Morning)</option>
+                                <option value="Night">🌙 شيفت مسائي (Night)</option>
+                                <option value="Overnight">🌌 أوفر نايت (Overnight)</option>
+                            </select>
+                        </div>
+                    </div>
 
-<div class="card" style="margin-top:18px">
-<h3 class="gold">04 — تفاصيل الحساب</h3>
-<div class="result-row"><span>قيمة ساعة العمل</span><b id="hourView">0</b></div>
-<div class="result-row"><span>إجمالي الأوفر تايم</span><b id="extraView" class="green">0</b></div>
-<div class="result-row"><span>خصم التأخير</span><b id="lateView" class="red">0</b></div>
-<div class="result-row"><span>خصومات أخرى</span><b id="dedView" class="red">0</b></div>
-<div class="result-row"><b>صافي المرتب</b><b class="gold" id="netView">0 EGP</b></div>
-</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Overtime Hours -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">عدد الساعات الإضافية (Overtime)</label>
+                            <input type="number" id="overtime-hours" min="0" step="0.5" value="1" placeholder="مثال: 2.5" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
+                        </div>
 
-<div class="card">
-<h3 class="gold">05 — سجل الحسابات</h3>
-<div id="history"><small>لا توجد حسابات محفوظة حتى الآن</small></div>
-<button onclick="clearHistory()" style="background:#333;color:white">مسح السجل</button>
-</div>
+                        <!-- Overtime Multiplier Selection -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">معدل حساب الإضافي</label>
+                            <select id="overtime-rate" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-semibold transition-all">
+                                <option value="1.5">ساعة ونص (1.5x) - افتراضي للشيفتات</option>
+                                <option value="2.0">ساعتين (2.0x) - العطلات والمناسبات</option>
+                                <option value="1.25">ساعة ورُبع (1.25x) - القانوني النهاري</option>
+                            </select>
+                        </div>
+                    </div>
 
-<div class="footer">YEHIA FINANCE © 2026</div>
-</div>
+                    <!-- Quick Calculation Preview for this entry -->
+                    <div class="p-3 bg-sky-50 rounded-xl border border-sky-100 flex flex-wrap items-center justify-between text-xs text-sky-900 gap-2">
+                        <span>معاينة إضافي هذا اليوم:</span>
+                        <span id="entry-preview-amount" class="font-bold text-sm text-brand-700">0.00 ج.م</span>
+                    </div>
 
-<script>
-const $ = id => document.getElementById(id);
-let lastResult = null;
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3 px-6 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus-circle text-lg"></i>
+                        إضافة اليوم إلى السجل الشهري
+                    </button>
+                </form>
+            </div>
+        </div>
 
-function money(n){
-return n.toLocaleString('en-EG',{minimumFractionDigits:2,maximumFractionDigits:2})+' EGP';
-}
+        <!-- Logged Shifts Table Section -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-brand-600"></i>
+                        سجل الشيفتات والساعات الإضافية للشهر
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">يتم احتساب إجمالي الإضافات هنا وإضافتها للراتب تلقائياً</p>
+                </div>
+                
+                <button id="clear-all-btn" class="text-xs text-rose-600 hover:text-rose-700 font-bold px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors self-start sm:self-auto flex items-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i>
+                    مسح السجل بالكامل
+                </button>
+            </div>
 
-function calculate(){
-const salary=+$('salary').value;
-const days=+$('days').value;
-const hours=+$('hours').value;
-const otHours=+$('otHours').value;
-const otDays=+$('otDays').value;
-const rate=+$('rate').value;
-const deductions=+$('deductions').value;
-const late=+$('late').value;
+            <!-- Table Wrapper -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-600 text-xs font-bold border-b border-slate-200">
+                            <th class="py-3.5 px-4">اليوم والتاريخ</th>
+                            <th class="py-3.5 px-4">نوع الشيفت</th>
+                            <th class="py-3.5 px-4">ساعات الإضافي</th>
+                            <th class="py-3.5 px-4">معدل الحساب</th>
+                            <th class="py-3.5 px-4">قيمة الإضافي المستحق</th>
+                            <th class="py-3.5 px-4 text-center">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="shifts-tbody" class="divide-y divide-slate-100 text-sm font-medium">
+                        <!-- Dynamic Rows loaded via Javascript -->
+                    </tbody>
+                </table>
+            </div>
 
-if(salary<=0 || days<=0 || hours<=0 ||
-otHours<0 || otDays<0 || deductions<0 || late<0){
-alert('راجع البيانات المدخلة من فضلك');
-return;
-}
+            <!-- Empty State Message -->
+            <div id="empty-state" class="py-12 text-center text-slate-400">
+                <i class="fa-regular fa-calendar-xmark text-4xl mb-3 text-slate-300"></i>
+                <p class="text-sm font-semibold">لم يتم تسجيل أي شيفتات إضافية حتى الآن لهذا الشهر</p>
+                <p class="text-xs text-slate-400 mt-1">قم بإضافة الساعات والإضافي من النموذج أعلاه</p>
+            </div>
+        </div>
 
-const hourly=salary/(days*hours);
-const extra=hourly*otHours*otDays*rate;
-const lateCost=hourly*late;
-const net=salary+extra-lateCost-deductions;
+    </main>
 
-lastResult={salary,extra,lateCost,deductions,net,hourly};
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>حاسبة المرتبات والشيفتات اليومية - مصممة خصيصاً للعمل بنظام الشيفتات والساعات الإضافية في مصر</p>
+        </div>
+    </footer>
 
-$('total').textContent=money(net);
-$('baseView').textContent=money(salary);
-$('otView').textContent=money(extra);
-$('hourView').textContent=money(hourly);
-$('extraView').textContent=money(extra);
-$('lateView').textContent=money(lateCost);
-$('dedView').textContent=money(deductions);
-$('netView').textContent=money(net);
+    <!-- Logic Script -->
+    <script>
+        // --- State Management ---
+        let baseSalary = 6000;
+        let workDays = 28;
+        let shiftHours = 8;
+        let shiftLogs = [];
 
-saveHistory();
-}
+        // Load saved state from localStorage if available
+        function loadState() {
+            const savedBase = localStorage.getItem('salary_base');
+            const savedDays = localStorage.getItem('salary_days');
+            const savedHours = localStorage.getItem('salary_hours');
+            const savedLogs = localStorage.getItem('salary_logs');
 
-function saveHistory(){
-if(!lastResult)return;
-let records=JSON.parse(localStorage.getItem('yehiaHistory')||'[]');
-records.unshift({...lastResult,date:new Date().toLocaleDateString('ar-EG')});
-records=records.slice(0,20);
-localStorage.setItem('yehiaHistory',JSON.stringify(records));
-showHistory();
-}
+            if (savedBase) baseSalary = parseFloat(savedBase);
+            if (savedDays) workDays = parseInt(savedDays);
+            if (savedHours) shiftHours = parseInt(savedHours);
+            if (savedLogs) {
+                try {
+                    shiftLogs = JSON.parse(savedLogs);
+                } catch(e) {
+                    shiftLogs = [];
+                }
+            }
 
-function showHistory(){
-let records=JSON.parse(localStorage.getItem('yehiaHistory')||'[]');
-$('history').innerHTML=records.length?
-records.map(r=>`<div class="history-item">
-${r.date} — <b class="gold">${money(r.net)}</b>
-</div>`).join(''):
-'<small>لا توجد حسابات محفوظة حتى الآن</small>';
-}
+            document.getElementById('base-salary-input').value = baseSalary;
+            document.getElementById('work-days-input').value = workDays;
+            document.getElementById('shift-hours-input').value = shiftHours;
+        }
 
-function clearHistory(){
-if(confirm('هل تريد مسح سجل الحسابات؟')){
-localStorage.removeItem('yehiaHistory');
-showHistory();
-}
-}
+        function saveState() {
+            localStorage.setItem('salary_base', baseSalary);
+            localStorage.setItem('salary_days', workDays);
+            localStorage.setItem('salary_hours', shiftHours);
+            localStorage.setItem('salary_logs', JSON.stringify(shiftLogs));
+        }
 
-showHistory();
-</script>
+        // --- Egypt Live Time Clock ---
+        function updateEgyptTime() {
+            const now = new Date();
+            
+            // Format time for Cairo timezone
+            const timeOptions = {
+                timeZone: 'Africa/Cairo',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const dateOptions = {
+                timeZone: 'Africa/Cairo',
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+
+            const timeStr = new Intl.DateTimeFormat('ar-EG', timeOptions).format(now);
+            const dateStr = new Intl.DateTimeFormat('ar-EG', dateOptions).format(now);
+
+            document.getElementById('egypt-time').textContent = timeStr;
+            document.getElementById('egypt-date').textContent = dateStr;
+        }
+
+        // Set default date picker to current date in YYYY-MM-DD
+        function initDatePicker() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            document.getElementById('entry-date').value = `${year}-${month}-${day}`;
+        }
+
+        // Auto change default overtime rate based on shift type
+        document.getElementById('shift-type').addEventListener('change', function(e) {
+            const shiftVal = e.target.value;
+            const rateSelect = document.getElementById('overtime-rate');
+            if (shiftVal === 'Morning') {
+                rateSelect.value = '1.25'; // Default or 1.5
+            } else if (shiftVal === 'Night') {
+                rateSelect.value = '1.5';
+            } else if (shiftVal === 'Overnight') {
+                rateSelect.value = '1.5';
+            }
+            updateEntryPreview();
+        });
+
+        // --- Calculations ---
+        function calculateRates() {
+            const dailyRate = baseSalary / (workDays || 1);
+            const hourlyRate = dailyRate / (shiftHours || 1);
+            return { dailyRate, hourlyRate };
+        }
+
+        function updateEntryPreview() {
+            const { hourlyRate } = calculateRates();
+            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
+            const rateMultiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
+            
+            const previewAmount = hours * hourlyRate * rateMultiplier;
+            document.getElementById('entry-preview-amount').textContent = previewAmount.toFixed(2) + ' ج.م';
+        }
+
+        function renderSummaryAndTable() {
+            const { dailyRate, hourlyRate } = calculateRates();
+
+            // Calculate totals from shift logs
+            let totalOvertimePay = 0;
+            let totalOvertimeHours = 0;
+
+            shiftLogs.forEach(item => {
+                const itemPay = item.hours * hourlyRate * item.multiplier;
+                totalOvertimePay += itemPay;
+                totalOvertimeHours += item.hours;
+            });
+
+            const netSalary = baseSalary + totalOvertimePay;
+
+            // Update UI Cards
+            document.getElementById('card-base-salary').textContent = baseSalary.toLocaleString('ar-EG') + ' ج.م';
+            document.getElementById('card-daily-rate').textContent = dailyRate.toFixed(2) + ' ج.م';
+            document.getElementById('card-hourly-rate').textContent = hourlyRate.toFixed(2) + ' ج.م';
+            document.getElementById('card-hours-per-day').textContent = shiftHours + ' ساعات/يوم';
+            
+            document.getElementById('card-total-overtime-pay').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
+            document.getElementById('card-total-overtime-hours').textContent = totalOvertimeHours + ' ساعة';
+            document.getElementById('card-net-salary').textContent = netSalary.toFixed(2) + ' ج.م';
+
+            // Render Table Rows
+            const tbody = document.getElementById('shifts-tbody');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '';
+
+            if (shiftLogs.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                
+                // Sort logs by date (newest first)
+                const sortedLogs = [...shiftLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                sortedLogs.forEach((item) => {
+                    const itemPay = item.hours * hourlyRate * item.multiplier;
+                    
+                    // Shift Badge styling & Arabic names
+                    let shiftBadge = '';
+                    if(item.type === 'Morning') {
+                        shiftBadge = `<span class="bg-amber-50 text-amber-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-amber-200/60 inline-flex items-center gap-1">☀️ صباحي</span>`;
+                    } else if(item.type === 'Night') {
+                        shiftBadge = `<span class="bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-indigo-200/60 inline-flex items-center gap-1">🌙 مسائي</span>`;
+                    } else {
+                        shiftBadge = `<span class="bg-purple-50 text-purple-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-purple-200/60 inline-flex items-center gap-1">🌌 أوفر نايت</span>`;
+                    }
+
+                    // Multiplier text badge
+                    let rateText = '';
+                    if(item.multiplier === 1.5) rateText = 'ساعة ونصف (1.5x)';
+                    else if(item.multiplier === 2.0) rateText = 'ساعتين (2.0x)';
+                    else rateText = `(x${item.multiplier})`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50/80 transition-colors';
+                    tr.innerHTML = `
+                        <td class="py-3 px-4 font-bold text-slate-800">${item.date}</td>
+                        <td class="py-3 px-4">${shiftBadge}</td>
+                        <td class="py-3 px-4 font-bold text-slate-700">${item.hours} ساعة</td>
+                        <td class="py-3 px-4 text-xs text-slate-500 font-semibold">${rateText}</td>
+                        <td class="py-3 px-4 font-extrabold text-emerald-600">${itemPay.toFixed(2)} ج.م</td>
+                        <td class="py-3 px-4 text-center">
+                            <button onclick="deleteShiftEntry('${item.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors" title="حذف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- Handlers & Events ---
+
+        // Input change handlers
+        document.getElementById('base-salary-input').addEventListener('input', function(e) {
+            baseSalary = parseFloat(e.target.value) || 0;
+            saveState();
+            renderSummaryAndTable();
+            updateEntryPreview();
+        });
+
+        document.getElementById('work-days-input').addEventListener('input', function(e) {
+            workDays = parseInt(e.target.value) || 1;
+            saveState();
+            renderSummaryAndTable();
+            updateEntryPreview();
+        });
+
+        document.getElementById('shift-hours-input').addEventListener('input', function(e) {
+            shiftHours = parseInt(e.target.value) || 1;
+            saveState();
+            renderSummaryAndTable();
+            updateEntryPreview();
+        });
+
+        document.getElementById('overtime-hours').addEventListener('input', updateEntryPreview);
+        document.getElementById('overtime-rate').addEventListener('change', updateEntryPreview);
+
+        // Submit Shift Form
+        document.getElementById('shift-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const date = document.getElementById('entry-date').value;
+            const type = document.getElementById('shift-type').value;
+            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
+            const multiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
+
+            if (hours <= 0) return;
+
+            const newEntry = {
+                id: Date.now().toString(),
+                date,
+                type,
+                hours,
+                multiplier
+            };
+
+            shiftLogs.push(newEntry);
+            saveState();
+            renderSummaryAndTable();
+
+            // Reset hours input
+            document.getElementById('overtime-hours').value = '1';
+            updateEntryPreview();
+        });
+
+        // Delete Individual Shift Entry
+        window.deleteShiftEntry = function(id) {
+            shiftLogs = shiftLogs.filter(item => item.id !== id);
+            saveState();
+            renderSummaryAndTable();
+        };
+
+        // Clear All Shifts
+        document.getElementById('clear-all-btn').addEventListener('click', function() {
+            if (shiftLogs.length === 0) return;
+            shiftLogs = [];
+            saveState();
+            renderSummaryAndTable();
+        });
+
+        // --- Initialization ---
+        window.onload = function() {
+            loadState();
+            initDatePicker();
+            updateEgyptTime();
+            setInterval(updateEgyptTime, 1000);
+            updateEntryPreview();
+            renderSummaryAndTable();
+        };
+    </script>
 </body>
 </html>
