@@ -1,705 +1,153 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Over Shift _ Yehia Ayman</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { cairo: ['Cairo', 'sans-serif'] },
-                    colors: {
-                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 800: '#0c4a6e' }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-
-    <style>
-        body { font-family: 'Cairo', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0b1120; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-
-        .cyber-bg {
-            background-color: #0b1120;
-            background-image: 
-                linear-gradient(to right, rgba(30, 41, 59, 0.3) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
-            background-size: 30px 30px;
-            background-position: center center;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#020617">
+<title>Over Shift — Yehia Ayman</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{cairo:['Cairo','sans-serif']},colors:{brand:{500:'#0284c7',600:'#0369a1',700:'#075985'}}}}};
+</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+body{font-family:Cairo,sans-serif}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#0b1120}::-webkit-scrollbar-thumb{background:#334155;border-radius:8px}
+.cyber-bg{background-color:#0b1120;background-image:linear-gradient(to right,rgba(30,41,59,.25) 1px,transparent 1px),linear-gradient(to bottom,rgba(30,41,59,.25) 1px,transparent 1px);background-size:30px 30px}
+input,select{color-scheme:dark}
+</style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between">
-
-    <!-- Header Section -->
-    <header class="bg-gradient-to-r from-slate-900 via-brand-800 to-slate-900 text-white shadow-lg border-b border-slate-700">
-        <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full border-2 border-sky-400/50 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-md" id="header-avatar-container">
-                        <span class="text-sky-400 font-bold text-sm" id="header-avatar-text">YA</span>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                            <i class="fa-solid fa-calculator text-sky-400"></i> Over Shift <span id="header-username-badge" class="text-xs bg-sky-500/20 text-sky-300 px-2.5 py-0.5 rounded-full border border-sky-400/30 font-normal">مرحباً: يحيى</span>
-                        </h1>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs text-slate-300">تصميم وتطوير:</span>
-                            <span class="bg-sky-500/20 text-sky-300 text-xs font-bold px-2.5 py-0.5 rounded-full border border-sky-400/30 flex items-center gap-1">
-                                <i class="fa-solid fa-code text-[10px]"></i> Yehia Ayman
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-3 self-start md:self-auto">
-                    <!-- مؤشر المزامنة السحابية -->
-                    <div id="cloud-sync-status" class="bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-emerald-400" title="الحالة السحابية">
-                        <i class="fa-solid fa-cloud-check text-sm"></i>
-                        <span class="hidden sm:inline font-bold">متصل بالسحاب</span>
-                    </div>
-
-                    <!-- زر تبديل الدارك مود -->
-                    <button onclick="toggleDarkMode()" id="dark-mode-btn" class="p-3 bg-slate-800/80 hover:bg-slate-700 text-sky-300 rounded-xl border border-slate-700/60 shadow-inner transition-all flex items-center gap-2 text-xs font-bold" title="تبديل الوضع الليلي">
-                        <i id="dark-mode-icon" class="fa-solid fa-moon text-lg"></i>
-                        <span id="dark-mode-text" class="hidden sm:inline">الوضع الليلي</span>
-                    </button>
-
-                    <div class="bg-slate-800/80 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-4">
-                        <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-lg"><i class="fa-regular fa-clock text-xl sm:text-2xl"></i></div>
-                        <div>
-                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">التوقيت المحلي في مصر</div>
-                            <div id="egypt-time" class="text-base sm:text-lg font-bold text-sky-300 font-mono">--:--:-- --</div>
-                            <div id="egypt-date" class="text-xs text-slate-300">-- --- ----</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow">
-        
-        <!-- Summary Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
-                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500 dark:text-slate-400">المرتب الأساسي</span><span class="p-2 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-lg text-sm"><i class="fa-solid fa-money-bill-wave"></i></span></div>
-                <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="card-base-salary">6,000 ج.م</div>
-                <div class="text-xs text-slate-400 mt-1">معدل اليوم (÷26): <span id="card-daily-rate" class="font-semibold text-slate-600 dark:text-slate-300">230.77 ج.م</span></div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
-                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500 dark:text-slate-400">أجر الساعة الأساسي</span><span class="p-2 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm"><i class="fa-solid fa-stopwatch"></i></span></div>
-                <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="card-hourly-rate">28.85 ج.م</div>
-                <div class="text-xs text-slate-400 mt-1">على أساس <span id="card-hours-per-day" class="font-semibold text-slate-600 dark:text-slate-300">8 ساعات/يوم</span></div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
-                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500 dark:text-slate-400">مكافأة KPI</span><span class="p-2 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-lg text-sm"><i class="fa-solid fa-award"></i></span></div>
-                <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400" id="card-kpi-bonus">500.00 ج.م</div>
-                <div class="text-xs text-slate-400 mt-1">حافز الأداء الشهري</div>
-            </div>
-
-            <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
-                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500 dark:text-slate-400">إجمالي الإضافي</span><span class="p-2 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg text-sm"><i class="fa-solid fa-arrow-trend-up"></i></span></div>
-                <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400" id="card-total-overtime-pay">0.00 ج.م</div>
-                <div class="text-xs text-slate-400 mt-1">الساعات: <span id="card-total-overtime-hours" class="font-semibold text-slate-600 dark:text-slate-300">0 ساعة</span></div>
-            </div>
-
-            <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md sm:col-span-2 lg:col-span-1">
-                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-sky-200">الصافي المستحق</span><span class="p-2 bg-white/10 text-sky-300 rounded-lg text-sm"><i class="fa-solid fa-wallet"></i></span></div>
-                <div class="text-3xl font-extrabold text-white" id="card-net-salary">6,500.00 ج.م</div>
-                <div class="text-xs text-sky-200/80 mt-1">أساسي + KPI + إضافي</div>
-            </div>
-        </div>
-
-        <!-- Inputs and Shift Logger -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-            <div class="lg:col-span-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm h-fit transition-colors">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-brand-600"></i> إعدادات الحسبة
-                </h2>
-
-                <div class="space-y-4">
-                    <!-- الصورة الشخصية -->
-                    <div class="p-3 bg-sky-50/50 dark:bg-sky-950/30 rounded-xl border border-sky-100 dark:border-sky-900/50">
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-image text-brand-600"></i> الصورة الشخصية للمستخدم
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <input type="file" id="avatar-input" accept="image/*" class="hidden">
-                            <button type="button" onclick="document.getElementById('avatar-input').click()" class="flex-1 py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:border-brand-500 rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 transition-all flex items-center justify-center gap-1.5 shadow-sm">
-                                <i class="fa-solid fa-upload text-brand-600"></i> اختيار صورة
-                            </button>
-                            <button type="button" id="remove-avatar-btn" onclick="removeAvatar()" class="hidden p-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg border border-rose-200 dark:border-rose-900 transition-colors" title="حذف الصورة">
-                                <i class="fa-solid fa-trash-can text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">المرتب الشهري (جنيه)</label>
-                        <div class="relative rounded-xl shadow-sm">
-                            <input type="number" id="base-salary-input" value="6000" min="0" step="100" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ج.م</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">حافز KPI (جنيه)</label>
-                        <div class="relative rounded-xl shadow-sm">
-                            <input type="number" id="kpi-input" value="500" min="0" step="50" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ج.م</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">عدد أيام العمل في الشهر</label>
-                        <div class="relative rounded-xl shadow-sm">
-                            <input type="number" id="work-days-input" value="26" min="1" max="31" class="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">يوم</div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">ساعات الشيفت الأساسي اليومي</label>
-                        <div class="relative rounded-xl shadow-sm">
-                            <input type="number" id="shift-hours-input" value="8" min="1" max="24" class="w-full pl-14 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ساعة</div>
-                        </div>
-                    </div>
-
-                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200/80 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                        <i class="fa-solid fa-calculator text-brand-600 ml-1"></i> المعادلة المعتمدة: <br>
-                        <strong class="text-slate-800 dark:text-slate-200">اليوم = المرتب ÷ 26 يوم</strong><br>
-                        <strong class="text-slate-800 dark:text-slate-200">الساعة = اليوم ÷ 8 ساعات</strong>
-                    </div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-8 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm transition-colors">
-                <h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4 pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-calendar-plus text-brand-600"></i> إضافة شيفت / وقت إضافي
-                </h2>
-
-                <form id="shift-form" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">التاريخ</label>
-                            <input type="date" id="entry-date" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">نوع الشيفت</label>
-                            <select id="shift-type" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-semibold transition-all">
-                                <option value="Morning">☀️ شيفت صباحي (Morning)</option>
-                                <option value="Night">🌙 شيفت مسائي (Night)</option>
-                                <option value="Overnight">🌌 أوفر نايت (Overnight)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">عدد الساعات الإضافية (Overtime)</label>
-                            <input type="number" id="overtime-hours" min="0.5" step="0.5" value="1" placeholder="1 أو 2" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-600 dark:text-slate-300 mb-1">حساب الساعة الإضافية</label>
-                            <select id="overtime-rate" class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 focus:ring-2 focus:ring-brand-500 text-slate-900 dark:text-white font-bold transition-all">
-                                <option value="1.5">ساعة ونصف (1.5x) - 43.27 ج.م/ساعة</option>
-                                <option value="2.0">ساعتين (2.0x) - 57.69 ج.م/ساعة</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="p-3 bg-sky-50 dark:bg-sky-950/40 rounded-xl border border-sky-100 dark:border-sky-900 flex items-center justify-between text-xs text-sky-900 dark:text-sky-300">
-                        <span>معاينة إضافي هذا اليوم:</span>
-                        <span id="entry-preview-amount" class="font-bold text-sm text-brand-700 dark:text-sky-400">43.27 ج.م</span>
-                    </div>
-
-                    <button type="submit" class="w-full py-3 px-6 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus-circle text-lg"></i> تسجيل اليوم في السجل
-                    </button>
-                </form>
-
-                <div class="mt-8">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-brand-600"></i> سجل الشيفتات المضافة هذا الشهر
-                        </h3>
-                        <button id="clear-all-btn" class="text-xs text-rose-600 dark:text-rose-400 hover:text-rose-800 font-bold flex items-center gap-1 bg-rose-50 dark:bg-rose-950/50 px-2.5 py-1.5 rounded-lg border border-rose-100 dark:border-rose-900 transition-colors">
-                            <i class="fa-solid fa-trash-can"></i> مسح الكل
-                        </button>
-                    </div>
-
-                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                        <table class="w-full text-right text-sm">
-                            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold border-b border-slate-200 dark:border-slate-800">
-                                <tr>
-                                    <th class="py-3 px-4">التاريخ</th>
-                                    <th class="py-3 px-4">الشيفت</th>
-                                    <th class="py-3 px-4">الساعات</th>
-                                    <th class="py-3 px-4">المعامل</th>
-                                    <th class="py-3 px-4">المبلغ الإضافي</th>
-                                    <th class="py-3 px-4 text-center">إجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody id="shifts-tbody" class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900"></tbody>
-                        </table>
-                        <div id="empty-state" class="p-8 text-center text-slate-400 dark:text-slate-500">
-                            <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i> لا توجد شيفتات مسجلة حتى الآن
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Total Summary Footer Section -->
-        <div class="mt-8 bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800">
-            <h2 class="text-xl font-extrabold mb-4 pb-3 border-b border-slate-800 flex items-center gap-2 text-sky-400">
-                <i class="fa-solid fa-calculator"></i> الإجمالي الشامل النهاري المستحق
-            </h2>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
-                    <span class="text-xs text-slate-400 block mb-1">المرتب الأساسي</span>
-                    <span id="footer-base-salary" class="text-lg font-bold text-white">6,000.00 ج.م</span>
-                </div>
-                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
-                    <span class="text-xs text-slate-400 block mb-1">حافز KPI</span>
-                    <span id="footer-kpi-bonus" class="text-lg font-bold text-amber-400">500.00 ج.م</span>
-                </div>
-                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
-                    <span class="text-xs text-slate-400 block mb-1">ساعات الإضافي</span>
-                    <span id="footer-total-hours" class="text-lg font-bold text-sky-400">0 ساعة</span>
-                </div>
-                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
-                    <span class="text-xs text-slate-400 block mb-1">مستحق الإضافي</span>
-                    <span id="footer-total-overtime" class="text-lg font-bold text-emerald-400">0.00 ج.م</span>
-                </div>
-                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 col-span-2 sm:col-span-1">
-                    <span class="text-xs text-slate-400 block mb-1">عدد الشيفتات</span>
-                    <span id="footer-shift-count" class="text-lg font-bold text-purple-400">0 شيفت</span>
-                </div>
-            </div>
-
-            <div class="bg-gradient-to-r from-sky-900/60 via-slate-800 to-sky-900/60 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-3">
-                    <div class="p-3 bg-sky-500/20 text-sky-400 rounded-xl text-xl"><i class="fa-solid fa-wallet"></i></div>
-                    <div>
-                        <div class="text-xs text-sky-200">الصافي النهائي (أساسي 6000 + KPI 500 + إضافي)</div>
-                        <div class="text-xs text-slate-400">محسوب بدقة بناءً على 26 يوم عمل / 8 ساعات</div>
-                    </div>
-                </div>
-                <div id="footer-final-total" class="text-3xl sm:text-4xl font-extrabold text-sky-300">6,500.00 ج.م</div>
-            </div>
-        </div>
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
-        <div class="max-w-7xl mx-auto px-4 space-y-2">
-            <p class="font-medium">حاسبة المرتبات والشيفتات اليومية - OverShift</p>
-            <p class="text-slate-500 flex items-center justify-center gap-1">
-                جميع الحقوق محفوظة © 2026 | تطوير <strong class="text-sky-400 font-bold">Yehia Ayman</strong> 🚀
-            </p>
-        </div>
-    </footer>
-
-    <script>
-        // 🔒 إعدادات جيت هاب والتشفير الآمن (التوكن والاتصال السحابي)
-        const GITHUB_CONFIG = {
-            owner: "aymn94",
-            repo: "overshift-data", 
-            t1: "Z2hwXw==", 
-            t2: "Z2l0aHViX3BhdF8xMUJLNTZYWEgwSVBZQk5hdVFjdUZmM19KTW5ORk5NdGNoRHd1aGpEaVk1cWljOWlvcjY1UE9hb3F1T1c4Ym1mQ3hyNTYzS0JJRlZuUXo2bXpydg==" 
-        };
-
-        function getGitHubToken() { 
-            try { return atob(GITHUB_CONFIG.t1) + atob(GITHUB_CONFIG.t2); }
-            catch(e) { return ""; }
-        }
-
-        // اسم المستخدم الثابت المباشر بدون شاشة دخول وباسورد
-        let currentUser = "yehia";
-        let baseSalary = 6000;
-        let kpiBonus = 500;
-        let shiftLogs = [];
-        let userAvatar = null;
-        let isDarkMode = true;
-        let currentFileSha = null;
-
-        // التشغيل المباشر للوحة التحكم وسحب الداتا أونلاين
-        window.addEventListener('load', async () => {
-            localStorage.setItem('current_active_user', currentUser);
-            
-            await fetchUserDataFromCloud(currentUser);
-
-            initDatePicker();
-            updateEgyptTime();
-            setInterval(updateEgyptTime, 1000);
-            updateEntryPreview();
-            applyTheme();
-        });
-
-        async function fetchUserDataFromCloud(username) {
-            updateCloudStatus('syncing', 'جاري المزامنة...');
-            const token = getGitHubToken();
-            const filePath = `users/user_${encodeURIComponent(username)}.json`;
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
-
-            try {
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    currentFileSha = data.sha;
-                    const contentDecoded = decodeURIComponent(escape(atob(data.content)));
-                    const userData = JSON.parse(contentDecoded);
-
-                    baseSalary = userData.baseSalary !== undefined ? userData.baseSalary : 6000;
-                    kpiBonus = userData.kpiBonus !== undefined ? userData.kpiBonus : 500;
-                    shiftLogs = userData.shiftLogs || [];
-                    userAvatar = userData.userAvatar || null;
-
-                    saveUserDataToLocal();
-                    updateCloudStatus('online', 'متصل بالسحاب');
-                } else if (response.status === 404) {
-                    currentFileSha = null;
-                    loadUserDataFromLocal(username);
-                    await pushUserDataToCloud();
-                } else {
-                    loadUserDataFromLocal(username);
-                    updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
-                }
-            } catch (err) {
-                console.error("Cloud Fetch Error:", err);
-                loadUserDataFromLocal(username);
-                updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
-            }
-
-            updateUIHeader(username);
-            renderSummaryAndTable();
-        }
-
-        async function pushUserDataToCloud() {
-            if (!currentUser) return;
-            updateCloudStatus('syncing', 'جاري الحفظ سحابياً...');
-            const token = getGitHubToken();
-            const filePath = `users/user_${encodeURIComponent(currentUser)}.json`;
-            const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${filePath}`;
-
-            const payloadData = {
-                username: currentUser,
-                baseSalary: baseSalary,
-                kpiBonus: kpiBonus,
-                shiftLogs: shiftLogs,
-                userAvatar: userAvatar,
-                updatedAt: new Date().toISOString()
-            };
-
-            const jsonString = JSON.stringify(payloadData, null, 2);
-            const contentEncoded = btoa(unescape(encodeURIComponent(jsonString)));
-
-            const bodyObj = {
-                message: `Update shift data for ${currentUser}`,
-                content: contentEncoded
-            };
-            if (currentFileSha) bodyObj.sha = currentFileSha;
-
-            try {
-                const response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(bodyObj)
-                });
-
-                if (response.ok) {
-                    const resData = await response.json();
-                    currentFileSha = resData.content.sha;
-                    updateCloudStatus('online', 'متصل بالسحاب');
-                } else {
-                    updateCloudStatus('offline', 'خطأ في الحفظ السحابي');
-                }
-            } catch (err) {
-                console.error("Cloud Push Error:", err);
-                updateCloudStatus('offline', 'أوفلاين (مُخزن محلياً)');
-            }
-        }
-
-        function loadUserDataFromLocal(username) {
-            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
-            const userData = usersDB[username];
-            if (userData) {
-                baseSalary = userData.baseSalary !== undefined ? userData.baseSalary : 6000;
-                kpiBonus = userData.kpiBonus !== undefined ? userData.kpiBonus : 500;
-                shiftLogs = userData.shiftLogs || [];
-                userAvatar = userData.userAvatar || null;
-            }
-        }
-
-        function saveUserDataToLocal() {
-            if (!currentUser) return;
-            let usersDB = JSON.parse(localStorage.getItem('overshift_users_db') || '{}');
-            usersDB[currentUser] = {
-                baseSalary: baseSalary,
-                kpiBonus: kpiBonus,
-                shiftLogs: shiftLogs,
-                userAvatar: userAvatar
-            };
-            localStorage.setItem('overshift_users_db', JSON.stringify(usersDB));
-        }
-
-        async function syncAndSaveData() {
-            saveUserDataToLocal();
-            await pushUserDataToCloud();
-        }
-
-        function updateCloudStatus(state, text) {
-            const statusDiv = document.getElementById('cloud-sync-status');
-            if (state === 'online') {
-                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-emerald-400";
-                statusDiv.innerHTML = `<i class="fa-solid fa-cloud-check text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
-            } else if (state === 'syncing') {
-                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-sky-400";
-                statusDiv.innerHTML = `<i class="fa-solid fa-arrows-rotate fa-spin text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
-            } else {
-                statusDiv.className = "bg-slate-800/80 backdrop-blur-md px-3 py-2 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-2 text-xs text-amber-400";
-                statusDiv.innerHTML = `<i class="fa-solid fa-cloud-slash text-sm"></i><span class="hidden sm:inline font-bold">${text}</span>`;
-            }
-        }
-
-        function updateUIHeader(username) {
-            document.getElementById('base-salary-input').value = baseSalary;
-            document.getElementById('kpi-input').value = kpiBonus;
-            document.getElementById('header-username-badge').textContent = `مرحباً: ${username}`;
-            applyAvatar(userAvatar);
-        }
-
-        document.getElementById('avatar-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = async function(evt) {
-                    userAvatar = evt.target.result;
-                    applyAvatar(userAvatar);
-                    await syncAndSaveData();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function applyAvatar(src) {
-            const headerContainer = document.getElementById('header-avatar-container');
-            const removeBtn = document.getElementById('remove-avatar-btn');
-
-            if (src) {
-                headerContainer.innerHTML = `<img src="${src}" alt="${currentUser}" class="w-full h-full object-cover">`;
-                removeBtn.classList.remove('hidden');
-            } else {
-                headerContainer.innerHTML = `<span class="text-sky-400 font-bold text-sm">YE</span>`;
-                removeBtn.classList.add('hidden');
-            }
-        }
-
-        async function removeAvatar() {
-            userAvatar = null;
-            document.getElementById('avatar-input').value = '';
-            applyAvatar(null);
-            await syncAndSaveData();
-        }
-
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            applyTheme();
-        }
-
-        function applyTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme !== null) isDarkMode = savedTheme === 'dark';
-
-            const htmlTag = document.documentElement;
-            const icon = document.getElementById('dark-mode-icon');
-            const text = document.getElementById('dark-mode-text');
-
-            if (isDarkMode) {
-                htmlTag.classList.add('dark');
-                icon.className = 'fa-solid fa-sun text-amber-400 text-lg';
-                text.textContent = 'الوضع النهاري';
-            } else {
-                htmlTag.classList.remove('dark');
-                icon.className = 'fa-solid fa-moon text-sky-300 text-lg';
-                text.textContent = 'الوضع الليلي';
-            }
-        }
-
-        function updateEgyptTime() {
-            const now = new Date();
-            const timeOptions = { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-            const dateOptions = { timeZone: 'Africa/Cairo', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-
-            document.getElementById('egypt-time').textContent = new Intl.DateTimeFormat('ar-EG', timeOptions).format(now);
-            document.getElementById('egypt-date').textContent = new Intl.DateTimeFormat('ar-EG', dateOptions).format(now);
-        }
-
-        function initDatePicker() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            document.getElementById('entry-date').value = `${year}-${month}-${day}`;
-        }
-
-        function calculateRates() {
-            const dailyRate = baseSalary / 26;
-            const hourlyRate = dailyRate / 8;
-            return { dailyRate, hourlyRate };
-        }
-
-        function updateEntryPreview() {
-            const { hourlyRate } = calculateRates();
-            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
-            const rateMultiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
-            
-            const previewAmount = hours * hourlyRate * rateMultiplier;
-            document.getElementById('entry-preview-amount').textContent = previewAmount.toFixed(2) + ' ج.م';
-        }
-
-        function renderSummaryAndTable() {
-            const { dailyRate, hourlyRate } = calculateRates();
-
-            let totalOvertimePay = 0;
-            let totalOvertimeHours = 0;
-
-            shiftLogs.forEach(item => {
-                const itemPay = item.hours * hourlyRate * item.multiplier;
-                totalOvertimePay += itemPay;
-                totalOvertimeHours += item.hours;
-            });
-
-            const netSalary = baseSalary + kpiBonus + totalOvertimePay;
-
-            document.getElementById('card-base-salary').textContent = baseSalary.toLocaleString('ar-EG') + ' ج.م';
-            document.getElementById('card-daily-rate').textContent = dailyRate.toFixed(2) + ' ج.م';
-            document.getElementById('card-hourly-rate').textContent = hourlyRate.toFixed(2) + ' ج.م';
-            document.getElementById('card-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
-            document.getElementById('card-total-overtime-pay').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
-            document.getElementById('card-total-overtime-hours').textContent = totalOvertimeHours + ' ساعة';
-            document.getElementById('card-net-salary').textContent = netSalary.toFixed(2) + ' ج.م';
-
-            document.getElementById('footer-base-salary').textContent = baseSalary.toFixed(2) + ' ج.م';
-            document.getElementById('footer-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
-            document.getElementById('footer-total-hours').textContent = totalOvertimeHours + ' ساعة';
-            document.getElementById('footer-total-overtime').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
-            document.getElementById('footer-shift-count').textContent = shiftLogs.length + ' شيفت';
-            document.getElementById('footer-final-total').textContent = netSalary.toFixed(2) + ' ج.م';
-
-            const tbody = document.getElementById('shifts-tbody');
-            const emptyState = document.getElementById('empty-state');
-            tbody.innerHTML = '';
-
-            if (shiftLogs.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                const sortedLogs = [...shiftLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                sortedLogs.forEach((item) => {
-                    const itemPay = item.hours * hourlyRate * item.multiplier;
-                    let shiftBadge = '';
-                    if(item.type === 'Morning') shiftBadge = `<span class="bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">☀️ صباحي</span>`;
-                    else if(item.type === 'Night') shiftBadge = `<span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs font-bold border border-indigo-200 dark:border-indigo-800">🌙 مسائي</span>`;
-                    else shiftBadge = `<span class="bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-bold border border-purple-200 dark:border-purple-800">🌌 أوفر نايت</span>`;
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${item.date}</td>
-                        <td class="py-3 px-4">${shiftBadge}</td>
-                        <td class="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">${item.hours} ساعة</td>
-                        <td class="py-3 px-4 text-xs font-semibold text-slate-600 dark:text-slate-400">${item.multiplier === 1.5 ? 'ساعة ونصف (1.5x)' : 'ساعتين (2.0x)'}</td>
-                        <td class="py-3 px-4 font-extrabold text-emerald-600 dark:text-emerald-400">${itemPay.toFixed(2)} ج.م</td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="deleteShiftEntry('${item.id}')" class="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 p-1" title="حذف">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        document.getElementById('base-salary-input').addEventListener('change', async function(e) {
-            baseSalary = parseFloat(e.target.value) || 0;
-            renderSummaryAndTable(); updateEntryPreview();
-            await syncAndSaveData();
-        });
-
-        document.getElementById('kpi-input').addEventListener('change', async function(e) {
-            kpiBonus = parseFloat(e.target.value) || 0;
-            renderSummaryAndTable();
-            await syncAndSaveData();
-        });
-
-        document.getElementById('work-days-input').addEventListener('input', function(e) {
-            document.getElementById('work-days-input').value = 26;
-        });
-
-        document.getElementById('shift-hours-input').addEventListener('input', function(e) {
-            document.getElementById('shift-hours-input').value = 8;
-        });
-
-        document.getElementById('overtime-hours').addEventListener('input', updateEntryPreview);
-        document.getElementById('overtime-rate').addEventListener('change', updateEntryPreview);
-
-        document.getElementById('shift-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const date = document.getElementById('entry-date').value;
-            const type = document.getElementById('shift-type').value;
-            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
-            const multiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
-
-            if (hours <= 0) return;
-
-            shiftLogs.push({ id: Date.now().toString(), date, type, hours, multiplier });
-            renderSummaryAndTable();
-            document.getElementById('overtime-hours').value = '1';
-            updateEntryPreview();
-
-            await syncAndSaveData();
-        });
-
-        window.deleteShiftEntry = async function(id) {
-            shiftLogs = shiftLogs.filter(item => item.id !== id);
-            renderSummaryAndTable();
-            await syncAndSaveData();
-        };
-
-        document.getElementById('clear-all-btn').addEventListener('click', async function() {
-            if (shiftLogs.length === 0) return;
-            shiftLogs = [];
-            renderSummaryAndTable();
-            await syncAndSaveData();
-        });
-    </script>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+<header class="bg-gradient-to-r from-slate-950 via-slate-800 to-slate-950 text-white shadow-lg border-b border-slate-700">
+ <div class="max-w-7xl mx-auto px-4 py-5 sm:px-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div class="flex items-center gap-3">
+   <div id="header-avatar-container" class="w-12 h-12 rounded-full border-2 border-sky-400/60 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0"><span class="text-sky-400 font-bold">YA</span></div>
+   <div><h1 class="text-2xl font-extrabold flex items-center gap-2"><i class="fa-solid fa-calculator text-sky-400"></i> Over Shift</h1><p class="text-xs text-slate-300 mt-1">تصميم وتطوير: <b class="text-sky-300">Yehia Ayman</b></p></div>
+  </div>
+  <div class="flex items-center gap-3 flex-wrap">
+   <div id="save-status" class="bg-slate-800 px-3 py-2 rounded-xl border border-slate-700 text-xs text-emerald-400"><i class="fa-solid fa-floppy-disk ml-1"></i> حفظ على الجهاز</div>
+   <button onclick="toggleTheme()" class="p-3 bg-slate-800 rounded-xl border border-slate-700 text-sky-300"><i id="theme-icon" class="fa-solid fa-sun"></i></button>
+   <div class="bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">
+    <div class="text-xs text-slate-400">التوقيت المحلي في مصر</div><div id="egypt-time" class="font-bold text-sky-300">--:--:--</div><div id="egypt-date" class="text-xs text-slate-300">---</div>
+   </div>
+  </div>
+ </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 py-7 sm:px-6">
+ <section class="mb-7 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-5 sm:p-6 border border-sky-500/20 shadow-xl">
+  <div class="flex items-center gap-4">
+   <div id="welcome-avatar" class="w-16 h-16 rounded-full overflow-hidden border-2 border-sky-400 bg-slate-700 flex items-center justify-center shrink-0"><i class="fa-solid fa-user text-sky-400 text-2xl"></i></div>
+   <div><h2 class="text-2xl sm:text-3xl font-extrabold text-white">Welcome, Yehia 👋</h2><p class="text-slate-400 text-sm mt-1">Your Personal Dashboard</p><p class="text-sky-400 text-xs font-bold mt-1">Over Shift Management</p></div>
+  </div>
+ </section>
+
+ <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-7">
+  <div class="stat"><p>المرتب الأساسي</p><strong id="card-base">6,000.00 ج.م</strong><small>معدل اليوم: <span id="card-daily">230.77</span> ج.م</small></div>
+  <div class="stat"><p>أجر الساعة الأساسي</p><strong id="card-hourly">28.85 ج.م</strong><small>على أساس 8 ساعات/يوم</small></div>
+  <div class="stat"><p>مكافأة KPI</p><strong id="card-kpi" class="!text-amber-400">500.00 ج.م</strong><small>حافز الأداء الشهري</small></div>
+  <div class="stat"><p>إجمالي الإضافي</p><strong id="card-overtime" class="!text-emerald-400">0.00 ج.م</strong><small>الساعات: <span id="card-hours">0</span></small></div>
+  <div class="bg-gradient-to-br from-sky-700 to-slate-900 text-white p-5 rounded-2xl shadow-md"><p class="text-sm text-sky-100">الصافي المستحق</p><strong id="card-net" class="block text-2xl font-extrabold mt-2">6,500.00 ج.م</strong><small class="text-sky-200">أساسي + KPI + إضافي</small></div>
+ </section>
+
+ <div class="grid grid-cols-1 lg:grid-cols-12 gap-7 mb-7">
+  <section class="lg:col-span-4 bg-slate-900 p-5 rounded-2xl border border-slate-800 h-fit">
+   <h2 class="font-bold text-lg mb-4 pb-3 border-b border-slate-800"><i class="fa-solid fa-sliders text-sky-400 ml-2"></i>إعدادات الحسبة</h2>
+   <div class="space-y-4">
+    <div class="p-3 bg-sky-950/30 rounded-xl border border-sky-900/60">
+     <label class="block text-xs font-bold mb-2">الصورة الشخصية للمستخدم</label>
+     <div class="flex gap-2"><input type="file" id="avatar-input" accept="image/*" class="hidden"><button onclick="document.getElementById('avatar-input').click()" class="flex-1 py-2 px-3 bg-slate-800 border border-slate-700 rounded-lg text-xs font-bold"><i class="fa-solid fa-upload text-sky-400 ml-1"></i>اختيار صورة</button><button id="remove-avatar" onclick="removeAvatar()" class="hidden p-2 text-rose-400 border border-rose-900 rounded-lg"><i class="fa-solid fa-trash"></i></button></div>
+    </div>
+    <label class="field">المرتب الشهري (جنيه)<input id="base-input" type="number" min="0" step="100" value="6000"></label>
+    <label class="field">حافز KPI (جنيه)<input id="kpi-input" type="number" min="0" step="50" value="500"></label>
+    <div class="p-4 bg-slate-800/70 rounded-xl border border-slate-700 text-xs text-slate-300 leading-7">المعادلة المعتمدة:<br><b class="text-white">اليوم = المرتب ÷ 26 يوم</b><br><b class="text-white">الساعة = اليوم ÷ 8 ساعات</b></div>
+    <button onclick="resetSettings()" class="w-full py-2 rounded-xl border border-slate-700 text-xs text-slate-300">إعادة الإعدادات الافتراضية</button>
+   </div>
+  </section>
+
+  <section class="lg:col-span-8 bg-slate-900 p-5 rounded-2xl border border-slate-800">
+   <h2 class="font-bold text-lg mb-4 pb-3 border-b border-slate-800"><i class="fa-solid fa-calendar-plus text-sky-400 ml-2"></i>إضافة شيفت / وقت إضافي</h2>
+   <form id="shift-form" class="space-y-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+     <label class="field">التاريخ<input type="date" id="entry-date" required></label>
+     <label class="field">نوع الشيفت<select id="shift-type"><option value="Morning">☀️ شيفت صباحي (Morning)</option><option value="Night">🌙 شيفت مسائي (Night)</option><option value="Overnight">🌌 أوفر نايت (Overnight)</option></select></label>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+     <label class="field">عدد الساعات الإضافية<input type="number" id="overtime-hours" min="0.5" step="0.5" value="1" required></label>
+     <label class="field">حساب الساعة الإضافية<select id="overtime-rate"><option value="1.5">ساعة ونصف (1.5x)</option><option value="2">ساعتين (2.0x)</option></select></label>
+    </div>
+    <div class="p-3 bg-sky-950/50 rounded-xl border border-sky-900 flex justify-between text-sm"><span>معاينة إضافي هذا اليوم:</span><b id="entry-preview" class="text-sky-300">43.27 ج.م</b></div>
+    <button class="w-full py-3 bg-sky-700 hover:bg-sky-600 text-white font-bold rounded-xl shadow-md"><i class="fa-solid fa-plus-circle ml-2"></i>تسجيل اليوم في السجل</button>
+   </form>
+   <div class="mt-8">
+    <div class="flex items-center justify-between gap-3 mb-4"><h3 class="font-bold"><i class="fa-solid fa-list-check text-sky-400 ml-2"></i>سجل الشيفتات</h3><button id="clear-all" class="text-xs text-rose-400 bg-rose-950/40 border border-rose-900 px-3 py-2 rounded-lg">مسح الكل</button></div>
+    <div class="overflow-x-auto rounded-xl border border-slate-800">
+     <table class="w-full text-right text-sm min-w-[620px]"><thead class="bg-slate-800 text-slate-300"><tr><th class="p-3">التاريخ</th><th class="p-3">الشيفت</th><th class="p-3">الساعات</th><th class="p-3">المعامل</th><th class="p-3">المبلغ الإضافي</th><th class="p-3 text-center">إجراء</th></tr></thead><tbody id="shifts-tbody" class="divide-y divide-slate-800"></tbody></table>
+     <div id="empty-state" class="p-8 text-center text-slate-500"><i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>لا توجد شيفتات مسجلة حتى الآن</div>
+    </div>
+   </div>
+  </section>
+ </div>
+
+ <section class="bg-slate-900 text-white rounded-2xl p-5 sm:p-6 shadow-xl border border-slate-800">
+  <h2 class="text-xl font-extrabold mb-5 pb-3 border-b border-slate-800 text-sky-400"><i class="fa-solid fa-calculator ml-2"></i>الإجمالي الشامل المستحق</h2>
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+   <div class="mini-stat"><span>المرتب الأساسي</span><b id="footer-base">6,000.00 ج.م</b></div><div class="mini-stat"><span>حافز KPI</span><b id="footer-kpi" class="text-amber-400">500.00 ج.م</b></div><div class="mini-stat"><span>ساعات الإضافي</span><b id="footer-hours" class="text-sky-400">0 ساعة</b></div><div class="mini-stat"><span>مستحق الإضافي</span><b id="footer-overtime" class="text-emerald-400">0.00 ج.م</b></div><div class="mini-stat col-span-2 sm:col-span-1"><span>عدد الشيفتات</span><b id="footer-count" class="text-purple-400">0 شيفت</b></div>
+  </div>
+  <div class="bg-sky-950/50 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-3"><div><p class="text-sky-200 text-sm">الصافي النهائي (أساسي + KPI + إضافي)</p><p class="text-slate-400 text-xs mt-1">محسوب بناءً على 26 يوم عمل / 8 ساعات</p></div><strong id="footer-total" class="text-3xl sm:text-4xl text-sky-300">6,500.00 ج.م</strong></div>
+ </section>
+</main>
+<footer class="bg-slate-950 text-slate-500 py-6 text-center text-xs border-t border-slate-800"><p>حاسبة المرتبات والشيفتات اليومية - OverShift</p><p class="mt-2">جميع الحقوق محفوظة © 2026 | تطوير <b class="text-sky-400">Yehia Ayman</b> 🚀</p></footer>
+
+<style>
+.stat{background:#0f172a;padding:18px;border-radius:16px;border:1px solid #1e293b}.stat p{font-size:13px;color:#94a3b8;font-weight:700}.stat strong{display:block;font-size:22px;font-weight:900;margin:9px 0;color:#f8fafc}.stat small{font-size:11px;color:#94a3b8}
+.field{display:block;font-size:12px;font-weight:700;color:#cbd5e1}.field input,.field select{display:block;width:100%;margin-top:7px;padding:11px 13px;border-radius:11px;border:1px solid #334155;background:#1e293b;color:white;outline:none}.field input:focus,.field select:focus{border-color:#0ea5e9;box-shadow:0 0 0 2px #0ea5e933}
+.mini-stat{background:#1e293b99;padding:13px;border:1px solid #33415599;border-radius:12px}.mini-stat span{display:block;font-size:11px;color:#94a3b8;margin-bottom:6px}.mini-stat b{font-size:15px}
+</style>
+
+<script>
+const STORAGE_KEY='overshift_yehia_v2';
+let baseSalary=6000,kpiBonus=500,shiftLogs=[],userAvatar=null,isDarkMode=true;
+const $=id=>document.getElementById(id);
+function loadData(){
+ try{const d=JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}');baseSalary=Number(d.baseSalary??6000);kpiBonus=Number(d.kpiBonus??500);shiftLogs=Array.isArray(d.shiftLogs)?d.shiftLogs:[];userAvatar=d.userAvatar||null;isDarkMode=localStorage.getItem('theme')!=='light';}catch(e){console.warn(e)}
+ $('base-input').value=baseSalary;$('kpi-input').value=kpiBonus;applyAvatar(userAvatar);applyTheme();render();
+}
+function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({baseSalary,kpiBonus,shiftLogs,userAvatar}));$('save-status').innerHTML='<i class="fa-solid fa-check ml-1"></i> تم الحفظ على الجهاز';}catch(e){$('save-status').textContent='مساحة التخزين ممتلئة';}}
+function rates(){const daily=baseSalary/26;return{daily,hourly:daily/8};}
+function money(n){return Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' ج.م';}
+function render(){
+ const {daily,hourly}=rates();let total=0,hours=0;
+ shiftLogs.forEach(x=>{total+=Number(x.hours)*hourly*Number(x.multiplier);hours+=Number(x.hours)});
+ const net=baseSalary+kpiBonus+total;
+ $('card-base').textContent=money(baseSalary);$('card-daily').textContent=daily.toFixed(2);$('card-hourly').textContent=money(hourly);$('card-kpi').textContent=money(kpiBonus);$('card-overtime').textContent=money(total);$('card-hours').textContent=hours+' ساعة';$('card-net').textContent=money(net);
+ $('footer-base').textContent=money(baseSalary);$('footer-kpi').textContent=money(kpiBonus);$('footer-hours').textContent=hours+' ساعة';$('footer-overtime').textContent=money(total);$('footer-count').textContent=shiftLogs.length+' شيفت';$('footer-total').textContent=money(net);
+ const tbody=$('shifts-tbody');tbody.innerHTML='';$('empty-state').classList.toggle('hidden',shiftLogs.length>0);
+ [...shiftLogs].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(x=>{
+  const labels={Morning:'☀️ صباحي',Night:'🌙 مسائي',Overnight:'🌌 أوفر نايت'};
+  const tr=document.createElement('tr');tr.className='hover:bg-slate-800/60';
+  const vals=[x.date,labels[x.type]||x.type,Number(x.hours)+' ساعة',Number(x.multiplier).toFixed(1)+'x',money(Number(x.hours)*hourly*Number(x.multiplier))];
+  vals.forEach(v=>{const td=document.createElement('td');td.className='p-3 whitespace-nowrap';td.textContent=v;tr.appendChild(td)});
+  const td=document.createElement('td');td.className='p-3 text-center';const b=document.createElement('button');b.className='text-rose-400 p-2';b.innerHTML='<i class="fa-solid fa-trash-can"></i>';b.title='حذف الشيفت';b.onclick=()=>deleteShift(x.id);td.appendChild(b);tr.appendChild(td);tbody.appendChild(tr);
+ });
+ updatePreview();
+}
+function updatePreview(){const h=Number($('overtime-hours').value)||0,m=Number($('overtime-rate').value)||1.5;$('entry-preview').textContent=money(h*rates().hourly*m);}
+function applyAvatar(src){const markup=src?`<img src="${src}" alt="Yehia" class="w-full h-full object-cover">`:'<i class="fa-solid fa-user text-sky-400 text-2xl"></i>';$('header-avatar-container').innerHTML=src?`<img src="${src}" alt="Yehia" class="w-full h-full object-cover">`:'<span class="text-sky-400 font-bold">YA</span>';$('welcome-avatar').innerHTML=markup;$('remove-avatar').classList.toggle('hidden',!src);}
+function removeAvatar(){userAvatar=null;$('avatar-input').value='';applyAvatar(null);saveData();}
+$('avatar-input').addEventListener('change',e=>{const file=e.target.files[0];if(!file)return;if(!file.type.startsWith('image/'))return alert('اختار ملف صورة صحيح');if(file.size>3*1024*1024)return alert('حجم الصورة كبير؛ اختار صورة أقل من 3 ميجابايت');const reader=new FileReader();reader.onload=()=>{userAvatar=reader.result;applyAvatar(userAvatar);saveData()};reader.readAsDataURL(file)});
+$('base-input').addEventListener('change',e=>{baseSalary=Math.max(0,Number(e.target.value)||0);render();saveData()});
+$('kpi-input').addEventListener('change',e=>{kpiBonus=Math.max(0,Number(e.target.value)||0);render();saveData()});
+$('overtime-hours').addEventListener('input',updatePreview);$('overtime-rate').addEventListener('change',updatePreview);
+$('shift-form').addEventListener('submit',e=>{e.preventDefault();const date=$('entry-date').value,hours=Number($('overtime-hours').value),type=$('shift-type').value,multiplier=Number($('overtime-rate').value);if(!date||hours<=0)return;shiftLogs.push({id:Date.now().toString(),date,type,hours,multiplier});$('overtime-hours').value='1';render();saveData()});
+function deleteShift(id){shiftLogs=shiftLogs.filter(x=>x.id!==id);render();saveData()}
+$('clear-all').addEventListener('click',()=>{if(!shiftLogs.length)return;if(confirm('متأكد إنك عايز تمسح كل الشيفتات؟')){shiftLogs=[];render();saveData()}});
+function resetSettings(){if(!confirm('إعادة المرتب والحافز للقيم الافتراضية؟'))return;baseSalary=6000;kpiBonus=500;$('base-input').value=6000;$('kpi-input').value=500;render();saveData()}
+function applyTheme(){document.documentElement.classList.toggle('dark',isDarkMode);document.body.classList.toggle('bg-slate-950',isDarkMode);$('theme-icon').className=isDarkMode?'fa-solid fa-sun':'fa-solid fa-moon';}
+function toggleTheme(){isDarkMode=!isDarkMode;localStorage.setItem('theme',isDarkMode?'dark':'light');applyTheme()}
+function updateClock(){const now=new Date();$('egypt-time').textContent=new Intl.DateTimeFormat('ar-EG',{timeZone:'Africa/Cairo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).format(now);$('egypt-date').textContent=new Intl.DateTimeFormat('ar-EG',{timeZone:'Africa/Cairo',weekday:'long',year:'numeric',month:'long',day:'numeric'}).format(now)}
+function init(){const now=new Date();$('entry-date').value=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');loadData();updateClock();setInterval(updateClock,1000)}
+init();
+</script>
 </body>
 </html>
