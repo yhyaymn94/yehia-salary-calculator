@@ -93,7 +93,7 @@
     <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow">
         
         <!-- Summary Cards Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <!-- Card 1: Base Salary -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-2">
@@ -114,24 +114,34 @@
                 <div class="text-xs text-slate-400 mt-1">على أساس <span id="card-hours-per-day" class="font-semibold text-slate-600">8 ساعات/يوم</span></div>
             </div>
 
-            <!-- Card 3: Total Overtime Bonus -->
+            <!-- Card 3: KPI Bonus -->
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-slate-500">إجمالي قيمة الإضافي</span>
+                    <span class="text-sm font-bold text-slate-500">مكافأة الـ KPI</span>
+                    <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-sm"><i class="fa-solid fa-award"></i></span>
+                </div>
+                <div class="text-2xl font-extrabold text-amber-600" id="card-kpi-bonus">500.00 ج.م</div>
+                <div class="text-xs text-slate-400 mt-1">حافز الأداء الشهري</div>
+            </div>
+
+            <!-- Card 4: Total Overtime Bonus -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm font-bold text-slate-500">إجمالي الإضافي</span>
                     <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm"><i class="fa-solid fa-arrow-trend-up"></i></span>
                 </div>
                 <div class="text-2xl font-extrabold text-emerald-600" id="card-total-overtime-pay">0.00 ج.م</div>
-                <div class="text-xs text-slate-400 mt-1">إجمالي الساعات: <span id="card-total-overtime-hours" class="font-semibold text-slate-600">0 ساعة</span></div>
+                <div class="text-xs text-slate-400 mt-1">الساعات: <span id="card-total-overtime-hours" class="font-semibold text-slate-600">0 ساعة</span></div>
             </div>
 
-            <!-- Card 4: Net Salary -->
-            <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md">
+            <!-- Card 5: Net Salary -->
+            <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md sm:col-span-2 lg:col-span-1">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm font-bold text-sky-200">الصافي المستحق</span>
                     <span class="p-2 bg-white/10 text-sky-300 rounded-lg text-sm"><i class="fa-solid fa-wallet"></i></span>
                 </div>
-                <div class="text-3xl font-extrabold text-white" id="card-net-salary">6,000 ج.م</div>
-                <div class="text-xs text-sky-200/80 mt-1">شامل المرتب الأساسي والإضافي</div>
+                <div class="text-3xl font-extrabold text-white" id="card-net-salary">6,500 ج.م</div>
+                <div class="text-xs text-sky-200/80 mt-1">أساسي + KPI + إضافي</div>
             </div>
         </div>
 
@@ -151,6 +161,15 @@
                         <label class="block text-xs font-bold text-slate-600 mb-1">المرتب الشهري (جنيه)</label>
                         <div class="relative rounded-xl shadow-sm">
                             <input type="number" id="base-salary-input" value="6000" min="0" step="100" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ج.م</div>
+                        </div>
+                    </div>
+
+                    <!-- KPI Incentive Input -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">حافز / KPI الشهري (جنيه)</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <input type="number" id="kpi-input" value="500" min="0" step="50" class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-slate-900 font-bold transition-all">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs font-bold">ج.م</div>
                         </div>
                     </div>
@@ -240,49 +259,49 @@
                     </button>
                 </form>
             </div>
-        </div>
-
-        <!-- Logged Shifts Table Section -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-brand-600"></i>
-                        سجل الشيفتات والساعات الإضافية للشهر
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">يتم احتساب إجمالي الإضافات هنا وإضافتها للراتب تلقائياً</p>
+        <!-- Total Summary Footer Card -->
+        <div class="mt-8 bg-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-800">
+            <h2 class="text-xl font-extrabold mb-4 pb-3 border-b border-slate-800 flex items-center gap-2 text-sky-400">
+                <i class="fa-solid fa-calculator"></i>
+                ملخص إجمالي المستحقات الشهرية
+            </h2>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                    <span class="text-xs text-slate-400 block mb-1">المرتب الأساسي</span>
+                    <span id="footer-base-salary" class="text-lg font-bold text-white">6,000.00 ج.م</span>
                 </div>
-                
-                <button id="clear-all-btn" class="text-xs text-rose-600 hover:text-rose-700 font-bold px-3 py-2 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors self-start sm:self-auto flex items-center gap-1.5">
-                    <i class="fa-solid fa-trash-can"></i>
-                    مسح السجل بالكامل
-                </button>
+                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                    <span class="text-xs text-slate-400 block mb-1">حافز KPI</span>
+                    <span id="footer-kpi-bonus" class="text-lg font-bold text-amber-400">500.00 ج.م</span>
+                </div>
+                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                    <span class="text-xs text-slate-400 block mb-1">إجمالي ساعات الإضافي</span>
+                    <span id="footer-total-hours" class="text-lg font-bold text-sky-400">0 ساعة</span>
+                </div>
+                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60">
+                    <span class="text-xs text-slate-400 block mb-1">مستحق الإضافي</span>
+                    <span id="footer-total-overtime" class="text-lg font-bold text-emerald-400">0.00 ج.م</span>
+                </div>
+                <div class="bg-slate-800/60 p-3.5 rounded-xl border border-slate-700/60 col-span-2 sm:col-span-1">
+                    <span class="text-xs text-slate-400 block mb-1">عدد الشيفتات الإضافية</span>
+                    <span id="footer-shift-count" class="text-lg font-bold text-purple-400">0 شيفت</span>
+                </div>
             </div>
 
-            <!-- Table Wrapper -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-600 text-xs font-bold border-b border-slate-200">
-                            <th class="py-3.5 px-4">اليوم والتاريخ</th>
-                            <th class="py-3.5 px-4">نوع الشيفت</th>
-                            <th class="py-3.5 px-4">ساعات الإضافي</th>
-                            <th class="py-3.5 px-4">معدل الحساب</th>
-                            <th class="py-3.5 px-4">قيمة الإضافي المستحق</th>
-                            <th class="py-3.5 px-4 text-center">إجراءات</th>
-                        </tr>
-                    </thead>
-                    <tbody id="shifts-tbody" class="divide-y divide-slate-100 text-sm font-medium">
-                        <!-- Dynamic Rows loaded via Javascript -->
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Empty State Message -->
-            <div id="empty-state" class="py-12 text-center text-slate-400">
-                <i class="fa-regular fa-calendar-xmark text-4xl mb-3 text-slate-300"></i>
-                <p class="text-sm font-semibold">لم يتم تسجيل أي شيفتات إضافية حتى الآن لهذا الشهر</p>
-                <p class="text-xs text-slate-400 mt-1">قم بإضافة الساعات والإضافي من النموذج أعلاه</p>
+            <div class="bg-gradient-to-r from-sky-900/60 via-slate-800 to-sky-900/60 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-sky-500/20 text-sky-400 rounded-xl text-xl">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-sky-200">الراتب النهائي الشامل (أساسي + KPI + إضافي)</div>
+                        <div class="text-xs text-slate-400">محسوب بتوقيت مصر وبناءً على المدخلات المحددة</div>
+                    </div>
+                </div>
+                <div id="footer-final-total" class="text-3xl sm:text-4xl font-extrabold text-sky-300">
+                    6,500.00 ج.م
+                </div>
             </div>
         </div>
 
@@ -303,6 +322,7 @@
     <script>
         // --- State Management ---
         let baseSalary = 6000;
+        let kpiBonus = 500;
         let workDays = 28;
         let shiftHours = 8;
         let shiftLogs = [];
@@ -310,11 +330,13 @@
         // Load saved state from localStorage if available
         function loadState() {
             const savedBase = localStorage.getItem('salary_base');
+            const savedKpi = localStorage.getItem('salary_kpi');
             const savedDays = localStorage.getItem('salary_days');
             const savedHours = localStorage.getItem('salary_hours');
             const savedLogs = localStorage.getItem('salary_logs');
 
             if (savedBase) baseSalary = parseFloat(savedBase);
+            if (savedKpi !== null && savedKpi !== undefined) kpiBonus = parseFloat(savedKpi);
             if (savedDays) workDays = parseInt(savedDays);
             if (savedHours) shiftHours = parseInt(savedHours);
             if (savedLogs) {
@@ -326,12 +348,14 @@
             }
 
             document.getElementById('base-salary-input').value = baseSalary;
+            document.getElementById('kpi-input').value = kpiBonus;
             document.getElementById('work-days-input').value = workDays;
             document.getElementById('shift-hours-input').value = shiftHours;
         }
 
         function saveState() {
             localStorage.setItem('salary_base', baseSalary);
+            localStorage.setItem('salary_kpi', kpiBonus);
             localStorage.setItem('salary_days', workDays);
             localStorage.setItem('salary_hours', shiftHours);
             localStorage.setItem('salary_logs', JSON.stringify(shiftLogs));
@@ -416,10 +440,11 @@
                 totalOvertimeHours += item.hours;
             });
 
-            const netSalary = baseSalary + totalOvertimePay;
+            const netSalary = baseSalary + kpiBonus + totalOvertimePay;
 
             // Update UI Cards
             document.getElementById('card-base-salary').textContent = baseSalary.toLocaleString('ar-EG') + ' ج.م';
+            document.getElementById('card-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
             document.getElementById('card-daily-rate').textContent = dailyRate.toFixed(2) + ' ج.م';
             document.getElementById('card-hourly-rate').textContent = hourlyRate.toFixed(2) + ' ج.م';
             document.getElementById('card-hours-per-day').textContent = shiftHours + ' ساعات/يوم';
@@ -427,6 +452,14 @@
             document.getElementById('card-total-overtime-pay').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
             document.getElementById('card-total-overtime-hours').textContent = totalOvertimeHours + ' ساعة';
             document.getElementById('card-net-salary').textContent = netSalary.toFixed(2) + ' ج.م';
+
+            // Update Total Summary Footer Card
+            document.getElementById('footer-base-salary').textContent = baseSalary.toFixed(2) + ' ج.م';
+            document.getElementById('footer-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
+            document.getElementById('footer-total-hours').textContent = totalOvertimeHours + ' ساعة';
+            document.getElementById('footer-total-overtime').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
+            document.getElementById('footer-shift-count').textContent = shiftLogs.length + ' شيفت';
+            document.getElementById('footer-final-total').textContent = netSalary.toFixed(2) + ' ج.م';
 
             // Render Table Rows
             const tbody = document.getElementById('shifts-tbody');
@@ -487,6 +520,12 @@
             saveState();
             renderSummaryAndTable();
             updateEntryPreview();
+        });
+
+        document.getElementById('kpi-input').addEventListener('input', function(e) {
+            kpiBonus = parseFloat(e.target.value) || 0;
+            saveState();
+            renderSummaryAndTable();
         });
 
         document.getElementById('work-days-input').addEventListener('input', function(e) {
