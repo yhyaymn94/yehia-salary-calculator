@@ -15,61 +15,35 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        cairo: ['Cairo', 'sans-serif'],
-                    },
+                    fontFamily: { cairo: ['Cairo', 'sans-serif'] },
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0369a1',
-                            700: '#075985',
-                            800: '#0c4a6e',
-                        }
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 800: '#0c4a6e' }
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8fafc;
-        }
+        body { font-family: 'Cairo', sans-serif; background-color: #f8fafc; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
         /* Splash Screen Styles */
         #splash-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #0b1120;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 99999;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0b1120; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 99999; transition: opacity 0.6s ease, visibility 0.6s ease;
             background-image: radial-gradient(circle at center, #1e293b 0%, #0b1120 100%);
         }
         .splash-logo { font-size: 38px; font-weight: 900; color: #38bdf8; letter-spacing: 2px; margin-bottom: 5px; text-transform: uppercase; }
         .splash-sub { font-size: 13px; color: #94a3b8; margin-bottom: 25px; letter-spacing: 1px; }
         .avatar-badge {
-            width: 90px; height: 90px;
-            border: 2px solid #38bdf8;
-            border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 22px; font-weight: 700; color: #38bdf8;
-            background: rgba(56, 189, 248, 0.05);
-            box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
-            margin-bottom: 15px;
-            overflow: hidden;
+            width: 90px; height: 90px; border: 2px solid #38bdf8; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: 700; color: #38bdf8;
+            background: rgba(56, 189, 248, 0.05); box-shadow: 0 0 25px rgba(56, 189, 248, 0.25); margin-bottom: 15px; overflow: hidden;
         }
-        .avatar-badge img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
+        .avatar-badge img { width: 100%; height: 100%; object-fit: cover; }
         .splash-welcome { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
         .splash-name { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 25px; }
         .loading-bar { width: 180px; height: 3px; background: #1e293b; border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
@@ -84,11 +58,7 @@
     <div id="splash-screen">
         <div class="splash-logo">OverShift ⚡</div>
         <div class="splash-sub">Shift Performance • Optimized</div>
-        
-        <div class="avatar-badge" id="splash-avatar-container">
-            <span id="splash-avatar-text">Yehia</span>
-        </div>
-        
+        <div class="avatar-badge" id="splash-avatar-container"><span id="splash-avatar-text">Yehia</span></div>
         <div class="splash-welcome">WELCOME</div>
         <div class="splash-name">Yehia Ayman</div>
         <div class="loading-bar"><div class="loading-progress"></div></div>
@@ -100,15 +70,12 @@
         <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <!-- الصورة المصغرة في الهيدر -->
                     <div class="w-12 h-12 rounded-full border-2 border-sky-400/50 bg-slate-800 flex items-center justify-center overflow-hidden shrink-0 shadow-md" id="header-avatar-container">
                         <span class="text-sky-400 font-bold text-sm" id="header-avatar-text">YA</span>
                     </div>
-
                     <div>
                         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                            <i class="fa-solid fa-calculator text-sky-400"></i>
-                            Over Shift
+                            <i class="fa-solid fa-calculator text-sky-400"></i> Over Shift
                         </h1>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="text-xs text-slate-300">تطوير وتصميم:</span>
@@ -120,9 +87,7 @@
                 </div>
                 
                 <div class="bg-slate-800/80 backdrop-blur-md px-4 py-3 rounded-xl border border-slate-700/60 shadow-inner flex items-center gap-4 self-start md:self-auto">
-                    <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-lg">
-                        <i class="fa-regular fa-clock text-xl sm:text-2xl"></i>
-                    </div>
+                    <div class="p-2.5 bg-sky-500/20 text-sky-400 rounded-lg"><i class="fa-regular fa-clock text-xl sm:text-2xl"></i></div>
                     <div>
                         <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">التوقيت المحلي في مصر</div>
                         <div id="egypt-time" class="text-base sm:text-lg font-bold text-sky-300 font-mono">--:--:-- --</div>
@@ -139,46 +104,31 @@
         <!-- Summary Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-slate-500">المرتب الأساسي</span>
-                    <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm"><i class="fa-solid fa-money-bill-wave"></i></span>
-                </div>
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500">المرتب الأساسي</span><span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm"><i class="fa-solid fa-money-bill-wave"></i></span></div>
                 <div class="text-2xl font-extrabold text-slate-900" id="card-base-salary">6,000 ج.م</div>
                 <div class="text-xs text-slate-400 mt-1">معدل اليوم (÷26): <span id="card-daily-rate" class="font-semibold text-slate-600">230.77 ج.م</span></div>
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-slate-500">أجر الساعة الأساسي</span>
-                    <span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm"><i class="fa-solid fa-stopwatch"></i></span>
-                </div>
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500">أجر الساعة الأساسي</span><span class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-sm"><i class="fa-solid fa-stopwatch"></i></span></div>
                 <div class="text-2xl font-extrabold text-slate-900" id="card-hourly-rate">28.85 ج.م</div>
                 <div class="text-xs text-slate-400 mt-1">على أساس <span id="card-hours-per-day" class="font-semibold text-slate-600">8 ساعات/يوم</span></div>
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-slate-500">مكافأة KPI</span>
-                    <span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-sm"><i class="fa-solid fa-award"></i></span>
-                </div>
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500">مكافأة KPI</span><span class="p-2 bg-amber-50 text-amber-600 rounded-lg text-sm"><i class="fa-solid fa-award"></i></span></div>
                 <div class="text-2xl font-extrabold text-amber-600" id="card-kpi-bonus">500.00 ج.م</div>
                 <div class="text-xs text-slate-400 mt-1">حافز الأداء الشهري</div>
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-slate-500">إجمالي الإضافي</span>
-                    <span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm"><i class="fa-solid fa-arrow-trend-up"></i></span>
-                </div>
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-slate-500">إجمالي الإضافي</span><span class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-sm"><i class="fa-solid fa-arrow-trend-up"></i></span></div>
                 <div class="text-2xl font-extrabold text-emerald-600" id="card-total-overtime-pay">0.00 ج.م</div>
                 <div class="text-xs text-slate-400 mt-1">الساعات: <span id="card-total-overtime-hours" class="font-semibold text-slate-600">0 ساعة</span></div>
             </div>
 
             <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md sm:col-span-2 lg:col-span-1">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-sm font-bold text-sky-200">الصافي المستحق</span>
-                    <span class="p-2 bg-white/10 text-sky-300 rounded-lg text-sm"><i class="fa-solid fa-wallet"></i></span>
-                </div>
+                <div class="flex items-center justify-between mb-2"><span class="text-sm font-bold text-sky-200">الصافي المستحق</span><span class="p-2 bg-white/10 text-sky-300 rounded-lg text-sm"><i class="fa-solid fa-wallet"></i></span></div>
                 <div class="text-3xl font-extrabold text-white" id="card-net-salary">6,500.00 ج.م</div>
                 <div class="text-xs text-sky-200/80 mt-1">أساسي + KPI + إضافي</div>
             </div>
@@ -188,14 +138,29 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
             <div class="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm h-fit">
                 <h2 class="text-lg font-bold text-slate-900 mb-4 pb-2 border-b border-slate-100 flex items-center gap-2">
-                    <i class="fa-solid fa-sliders text-brand-600"></i> إعدادات الحسبة
+                    <i class="fa-solid fa-sliders text-brand-600"></i> إعدادات الحسبة والمزامنة
                 </h2>
 
                 <div class="space-y-4">
-                    <!-- خيار تغيير الصورة الشخصية -->
+                    <!-- قسم نقل البيانات بين الجهازين (تصدير واستيراد) -->
+                    <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200">
+                        <label class="block text-xs font-bold text-emerald-900 mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-arrows-rotate text-emerald-600"></i> نقل البيانات بين البيسي والموبايل
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="exportData()" class="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-copy"></i> تصدير (نسخ)
+                            </button>
+                            <button type="button" onclick="importData()" class="py-2 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm">
+                                <i class="fa-solid fa-paste"></i> استيراد (لصق)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- الصورة الشخصية -->
                     <div class="p-3 bg-sky-50/50 rounded-xl border border-sky-100">
                         <label class="block text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
-                            <i class="fa-solid fa-image text-brand-600"></i> الصورة الشخصية (الملف الشخصي)
+                            <i class="fa-solid fa-image text-brand-600"></i> الصورة الشخصية
                         </label>
                         <div class="flex items-center gap-2">
                             <input type="file" id="avatar-input" accept="image/*" class="hidden">
@@ -427,7 +392,49 @@
             localStorage.setItem('salary_logs', JSON.stringify(shiftLogs));
         }
 
-        // إتاحة تغيير الصورة ورسمها في الـ Splash والـ Header
+        // خاصية تصدير البيانات (نسخ في الحافظة)
+        function exportData() {
+            const exportObject = {
+                baseSalary,
+                kpiBonus,
+                shiftLogs,
+                userAvatar
+            };
+            const jsonString = JSON.stringify(exportObject);
+            
+            navigator.clipboard.writeText(jsonString).then(() => {
+                alert('✅ تم نسخ كود البيانات بنجاح! يمكنك الآن إرساله للموبايل ولصقه هناك.');
+            }).catch(() => {
+                prompt('قم بنسخ هذا النص بالكامل:', jsonString);
+            });
+        }
+
+        // خاصية استيراد البيانات (لصق النص)
+        function importData() {
+            const jsonInput = prompt('قم بلصق كود البيانات الذي نسخته هنا:');
+            if (!jsonInput) return;
+
+            try {
+                const parsed = JSON.parse(jsonInput.trim());
+                if (parsed.baseSalary !== undefined) baseSalary = parsed.baseSalary;
+                if (parsed.kpiBonus !== undefined) kpiBonus = parsed.kpiBonus;
+                if (parsed.shiftLogs && Array.isArray(parsed.shiftLogs)) shiftLogs = parsed.shiftLogs;
+                if (parsed.userAvatar !== undefined) {
+                    userAvatar = parsed.userAvatar;
+                    if (userAvatar) localStorage.setItem('user_avatar', userAvatar);
+                    else localStorage.removeItem('user_avatar');
+                    applyAvatar(userAvatar);
+                }
+
+                saveState();
+                renderSummaryAndTable();
+                updateEntryPreview();
+                alert('🎉 تم تحديث واستيراد بياناتك بنجاح!');
+            } catch (err) {
+                alert('❌ الكود غير صحيح، يرجى التأكد من نسخ النص بالكامل.');
+            }
+        }
+
         document.getElementById('avatar-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
