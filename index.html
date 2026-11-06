@@ -339,6 +339,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+      // انتظر اكتمال بناء عناصر الصفحة قبل ربط أحداث تسجيل الدخول والواجهة.
+      document.addEventListener("DOMContentLoaded", () => {
       // إعدادات مشروع OverShift السحابي. المفتاح هنا Publishable فقط، وليس مفتاحاً سرياً.
       const SUPABASE_URL = "https://rmhcmlujiacuydgmchih.supabase.co";
       const SUPABASE_ANON_KEY = "sb_publishable_M5WAfXOvnYVbOiAQ1RLUkA_FnujlY9-";
@@ -714,6 +716,7 @@
           if (!session) hideDashboard();
         });
       });
+      }); // نهاية DOMContentLoaded
     </script>
 
 
