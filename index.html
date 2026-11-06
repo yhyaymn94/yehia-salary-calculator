@@ -69,7 +69,7 @@
     </div>
 
     <!-- Header Section -->
-    <header class="bg-gradient-to-r from-slate-900 via-brand-800 to-slate-900 text-white shadow-lg border-b border-slate-700">
+    <header class="hidden bg-gradient-to-r from-slate-900 via-brand-800 to-slate-900 text-white shadow-lg border-b border-slate-700">
         <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div class="flex items-center gap-4">
@@ -110,7 +110,7 @@
     </header>
 
     <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow">
+    <main class="hidden max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow">
         
         <!-- Summary Cards Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
@@ -328,7 +328,7 @@
         </div>
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
+    <footer class="hidden bg-slate-900 text-slate-400 py-6 text-center text-xs border-t border-slate-800">
         <div class="max-w-7xl mx-auto px-4 space-y-2">
             <p class="font-medium">حاسبة المرتبات والشيفتات اليومية - OverShift</p>
             <p class="text-slate-500 flex items-center justify-center gap-1">
@@ -337,281 +337,423 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                const splash = document.getElementById('splash-screen');
-                splash.style.opacity = '0';
-                setTimeout(() => { splash.style.display = 'none'; }, 600);
-            }, 2200);
+      // إعدادات مشروع OverShift السحابي. المفتاح هنا Publishable فقط، وليس مفتاحاً سرياً.
+      const SUPABASE_URL = "https://rmhcmlujiacuydgmchih.supabase.co";
+      const SUPABASE_ANON_KEY = "sb_publishable_M5WAfXOvnYVbOiAQ1RLUkA_FnujlY9-";
+      const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      let currentUser = null;
+      let baseSalary = 6000, kpiBonus = 500, workDays = 26, shiftHours = 8;
+      let shiftLogs = [], userAvatar = null, isDarkMode = true;
+      let saveTimer = null, cloudLoaded = false, realtimeChannel = null, egyptClockTimer = null;
+
+      const $ = id => document.getElementById(id);
+      function message(text, error=false) {
+        $("auth-message").textContent = text;
+        $("auth-message").className = "text-sm text-center mt-4 " + (error ? "text-rose-300" : "text-amber-300");
+      }
+      function showAuth(mode) {
+        $("login-form").classList.toggle("hidden", mode !== "login");
+        $("signup-form").classList.toggle("hidden", mode !== "signup");
+        $("show-login").className = mode === "login" ? "py-2 rounded-lg bg-sky-600 text-white font-bold" : "py-2 rounded-lg text-slate-300 font-bold";
+        $("show-signup").className = mode === "signup" ? "py-2 rounded-lg bg-sky-600 text-white font-bold" : "py-2 rounded-lg text-slate-300 font-bold";
+        message("");
+      }
+      function showDashboard(user) {
+        currentUser = user;
+        $("auth-screen").classList.add("hidden");
+        $("account-bar").classList.remove("hidden");
+        const accountName = user.user_metadata?.username || user.username || user.email?.split("@")[0] || "حسابي";
+        $("signed-in-email").textContent = "أهلاً، " + accountName;
+        document.querySelector("header").classList.remove("hidden");
+        document.querySelector("main").classList.remove("hidden");
+        document.querySelector("footer").classList.remove("hidden");
+      }
+      function hideDashboard() {
+        currentUser = null;
+        cloudLoaded = false;
+        if (realtimeChannel && sb) { sb.removeChannel(realtimeChannel); realtimeChannel = null; }
+        if (egyptClockTimer) { clearInterval(egyptClockTimer); egyptClockTimer = null; }
+        $("auth-screen").classList.remove("hidden");
+        $("account-bar").classList.add("hidden");
+        document.querySelector("header").classList.add("hidden");
+        document.querySelector("main").classList.add("hidden");
+        document.querySelector("footer").classList.add("hidden");
+      }
+
+      async function accountGateway(payload) {
+        const { data, error } = await sb.functions.invoke("account-gateway", { body: payload });
+        if (error) {
+          let serverMessage = data && typeof data.error === "string" ? data.error : null;
+          if (!serverMessage && error.context && typeof error.context.json === "function") {
+            try { const body = await error.context.json(); serverMessage = body?.error || null; } catch (_) {}
+          }
+          throw new Error(serverMessage || error.message || "تعذر الاتصال بخدمة الحسابات.");
+        }
+        if (!data || data.error) throw new Error(data?.error || "استجابة غير صحيحة من الخادم.");
+        if (!data.session?.access_token || !data.session?.refresh_token) {
+          throw new Error(data.error || "لم يتم إنشاء جلسة دخول. حاول تسجيل الدخول مرة أخرى.");
+        }
+        const { data: sessionData, error: sessionError } = await sb.auth.setSession({
+          access_token: data.session.access_token,
+          refresh_token: data.session.refresh_token
         });
+        if (sessionError) throw sessionError;
+        await startUserSession(sessionData.user || data.user);
+      }
 
-        let baseSalary = 6000;
-        let kpiBonus = 500;
-        let workDays = 26;
-        let shiftHours = 8;
-        let shiftLogs = [];
-        let userAvatar = null;
-        let isDarkMode = true; // الافتراضي دارك مود
+      $("show-login").addEventListener("click", () => showAuth("login"));
+      $("show-signup").addEventListener("click", () => showAuth("signup"));
 
-        function loadState() {
-            const savedBase = localStorage.getItem('salary_base');
-            const savedKpi = localStorage.getItem('salary_kpi');
-            const savedLogs = localStorage.getItem('salary_logs');
-            const savedAvatar = localStorage.getItem('user_avatar');
-            const savedTheme = localStorage.getItem('theme');
+      $("login-form").addEventListener("submit", async e => {
+        e.preventDefault();
+        const btn = $("login-form").querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = "جاري تسجيل الدخول...";
+        try {
+          await accountGateway({
+            action: "login",
+            username: $("login-username").value,
+            password: $("login-password").value
+          });
+        } catch (err) { message(err.message || "فشل تسجيل الدخول.", true); }
+        finally { btn.disabled = false; btn.textContent = "دخول"; }
+      });
 
-            if (savedBase) baseSalary = parseFloat(savedBase);
-            if (savedKpi !== null && savedKpi !== undefined) kpiBonus = parseFloat(savedKpi);
-            
-            workDays = 26; 
-            shiftHours = 8;
+      $("signup-form").addEventListener("submit", async e => {
+        e.preventDefault();
+        const btn = $("signup-form").querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = "جاري إنشاء الحساب...";
+        try {
+          await accountGateway({
+            action: "signup",
+            username: $("signup-username").value,
+            displayName: $("signup-name").value,
+            password: $("signup-password").value,
+            inviteCode: $("invite-code").value
+          });
+        } catch (err) { message(err.message || "تعذر إنشاء الحساب.", true); }
+        finally { btn.disabled = false; btn.textContent = "إنشاء الحساب"; }
+      });
 
-            if (savedLogs) {
-                try { shiftLogs = JSON.parse(savedLogs); } catch(e) { shiftLogs = []; }
-            }
+      $("logout-btn").addEventListener("click", async () => {
+        if (sb) await sb.auth.signOut();
+        hideDashboard();
+      });
 
-            if (savedAvatar) {
-                userAvatar = savedAvatar;
-                applyAvatar(userAvatar);
-            }
+      async function startUserSession(user) {
+        showDashboard(user);
+        await loadCloudState();
+        initDatePicker();
+        updateEgyptTime();
+        updateEntryPreview();
+        renderSummaryAndTable();
+        if (egyptClockTimer) clearInterval(egyptClockTimer);
+        egyptClockTimer = setInterval(updateEgyptTime, 1000);
+        if (realtimeChannel) sb.removeChannel(realtimeChannel);
+        realtimeChannel = sb.channel("overshift-user-" + user.id)
+          .on("postgres_changes", {
+            event: "*", schema: "public", table: "user_data", filter: "user_id=eq." + user.id
+          }, async payload => {
+            if (!currentUser || currentUser.id !== user.id || !payload.new) return;
+            // استقبال التعديلات القادمة من الجهاز الآخر تلقائياً.
+            try { await loadCloudState(); } catch (err) { console.warn("Cloud refresh failed:", err); }
+          })
+          .subscribe();
+        const splash = $("splash-screen");
+        if (splash) splash.style.display = "none";
+      }
 
-            // إعداد الثيم (دارك / فواتح)
-            if (savedTheme !== null) {
-                isDarkMode = savedTheme === 'dark';
-            } else {
-                isDarkMode = true; // الافتراضي دارك
-            }
-            applyTheme();
-
-            document.getElementById('base-salary-input').value = baseSalary;
-            document.getElementById('kpi-input').value = kpiBonus;
-            document.getElementById('work-days-input').value = workDays;
-            document.getElementById('shift-hours-input').value = shiftHours;
-        }
-
-        function saveState() {
-            localStorage.setItem('salary_base', baseSalary);
-            localStorage.setItem('salary_kpi', kpiBonus);
-            localStorage.setItem('salary_days', 26);
-            localStorage.setItem('salary_hours', 8);
-            localStorage.setItem('salary_logs', JSON.stringify(shiftLogs));
-        }
-
-        function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            applyTheme();
-        }
-
-        function applyTheme() {
-            const htmlTag = document.documentElement;
-            const icon = document.getElementById('dark-mode-icon');
-            const text = document.getElementById('dark-mode-text');
-
-            if (isDarkMode) {
-                htmlTag.classList.add('dark');
-                icon.className = 'fa-solid fa-sun text-amber-400 text-lg';
-                text.textContent = 'الوضع النهاري';
-            } else {
-                htmlTag.classList.remove('dark');
-                icon.className = 'fa-solid fa-moon text-sky-300 text-lg';
-                text.textContent = 'الوضع الليلي';
-            }
-        }
-
-        document.getElementById('avatar-input').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    userAvatar = evt.target.result;
-                    localStorage.setItem('user_avatar', userAvatar);
-                    applyAvatar(userAvatar);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function applyAvatar(src) {
-            const splashContainer = document.getElementById('splash-avatar-container');
-            const headerContainer = document.getElementById('header-avatar-container');
-            const removeBtn = document.getElementById('remove-avatar-btn');
-
-            if (src) {
-                splashContainer.innerHTML = `<img src="${src}" alt="Yehia Ayman">`;
-                headerContainer.innerHTML = `<img src="${src}" alt="Yehia Ayman" class="w-full h-full object-cover">`;
-                removeBtn.classList.remove('hidden');
-            } else {
-                splashContainer.innerHTML = `<span id="splash-avatar-text">Yehia</span>`;
-                headerContainer.innerHTML = `<span class="text-sky-400 font-bold text-sm" id="header-avatar-text">YA</span>`;
-                removeBtn.classList.add('hidden');
-            }
-        }
-
-        function removeAvatar() {
-            userAvatar = null;
-            localStorage.removeItem('user_avatar');
-            document.getElementById('avatar-input').value = '';
-            applyAvatar(null);
-        }
-
-        function updateEgyptTime() {
-            const now = new Date();
-            const timeOptions = { timeZone: 'Africa/Cairo', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
-            const dateOptions = { timeZone: 'Africa/Cairo', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-
-            document.getElementById('egypt-time').textContent = new Intl.DateTimeFormat('ar-EG', timeOptions).format(now);
-            document.getElementById('egypt-date').textContent = new Intl.DateTimeFormat('ar-EG', dateOptions).format(now);
-        }
-
-        function initDatePicker() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            document.getElementById('entry-date').value = `${year}-${month}-${day}`;
-        }
-
-        function calculateRates() {
-            const dailyRate = baseSalary / 26;
-            const hourlyRate = dailyRate / 8;
-            return { dailyRate, hourlyRate };
-        }
-
-        function updateEntryPreview() {
-            const { hourlyRate } = calculateRates();
-            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
-            const rateMultiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
-            
-            const previewAmount = hours * hourlyRate * rateMultiplier;
-            document.getElementById('entry-preview-amount').textContent = previewAmount.toFixed(2) + ' ج.م';
-        }
-
-        function renderSummaryAndTable() {
-            const { dailyRate, hourlyRate } = calculateRates();
-
-            let totalOvertimePay = 0;
-            let totalOvertimeHours = 0;
-
-            shiftLogs.forEach(item => {
-                const itemPay = item.hours * hourlyRate * item.multiplier;
-                totalOvertimePay += itemPay;
-                totalOvertimeHours += item.hours;
-            });
-
-            const netSalary = baseSalary + kpiBonus + totalOvertimePay;
-
-            document.getElementById('card-base-salary').textContent = baseSalary.toLocaleString('ar-EG') + ' ج.م';
-            document.getElementById('card-daily-rate').textContent = dailyRate.toFixed(2) + ' ج.م';
-            document.getElementById('card-hourly-rate').textContent = hourlyRate.toFixed(2) + ' ج.م';
-            document.getElementById('card-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
-            document.getElementById('card-total-overtime-pay').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
-            document.getElementById('card-total-overtime-hours').textContent = totalOvertimeHours + ' ساعة';
-            document.getElementById('card-net-salary').textContent = netSalary.toFixed(2) + ' ج.م';
-
-            document.getElementById('footer-base-salary').textContent = baseSalary.toFixed(2) + ' ج.م';
-            document.getElementById('footer-kpi-bonus').textContent = kpiBonus.toFixed(2) + ' ج.م';
-            document.getElementById('footer-total-hours').textContent = totalOvertimeHours + ' ساعة';
-            document.getElementById('footer-total-overtime').textContent = totalOvertimePay.toFixed(2) + ' ج.م';
-            document.getElementById('footer-shift-count').textContent = shiftLogs.length + ' شيفت';
-            document.getElementById('footer-final-total').textContent = netSalary.toFixed(2) + ' ج.م';
-
-            const tbody = document.getElementById('shifts-tbody');
-            const emptyState = document.getElementById('empty-state');
-            tbody.innerHTML = '';
-
-            if (shiftLogs.length === 0) {
-                emptyState.classList.remove('hidden');
-            } else {
-                emptyState.classList.add('hidden');
-                const sortedLogs = [...shiftLogs].sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                sortedLogs.forEach((item) => {
-                    const itemPay = item.hours * hourlyRate * item.multiplier;
-                    let shiftBadge = '';
-                    if(item.type === 'Morning') shiftBadge = `<span class="bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">☀️ صباحي</span>`;
-                    else if(item.type === 'Night') shiftBadge = `<span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs font-bold border border-indigo-200 dark:border-indigo-800">🌙 مسائي</span>`;
-                    else shiftBadge = `<span class="bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-bold border border-purple-200 dark:border-purple-800">🌌 أوفر نايت</span>`;
-
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors';
-                    tr.innerHTML = `
-                        <td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${item.date}</td>
-                        <td class="py-3 px-4">${shiftBadge}</td>
-                        <td class="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">${item.hours} ساعة</td>
-                        <td class="py-3 px-4 text-xs font-semibold text-slate-600 dark:text-slate-400">${item.multiplier === 1.5 ? 'ساعة ونصف (1.5x)' : 'ساعتين (2.0x)'}</td>
-                        <td class="py-3 px-4 font-extrabold text-emerald-600 dark:text-emerald-400">${itemPay.toFixed(2)} ج.م</td>
-                        <td class="py-3 px-4 text-center">
-                            <button onclick="deleteShiftEntry('${item.id}')" class="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 p-1" title="حذف">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-        }
-
-        document.getElementById('base-salary-input').addEventListener('input', function(e) {
-            baseSalary = parseFloat(e.target.value) || 0;
-            saveState(); renderSummaryAndTable(); updateEntryPreview();
-        });
-
-        document.getElementById('kpi-input').addEventListener('input', function(e) {
-            kpiBonus = parseFloat(e.target.value) || 0;
-            saveState(); renderSummaryAndTable();
-        });
-
-        document.getElementById('work-days-input').addEventListener('input', function(e) {
-            document.getElementById('work-days-input').value = 26;
-        });
-
-        document.getElementById('shift-hours-input').addEventListener('input', function(e) {
-            document.getElementById('shift-hours-input').value = 8;
-        });
-
-        document.getElementById('overtime-hours').addEventListener('input', updateEntryPreview);
-        document.getElementById('overtime-rate').addEventListener('change', updateEntryPreview);
-
-        document.getElementById('shift-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const date = document.getElementById('entry-date-input') || document.getElementById('entry-date').value;
-            const type = document.getElementById('shift-type').value;
-            const hours = parseFloat(document.getElementById('overtime-hours').value) || 0;
-            const multiplier = parseFloat(document.getElementById('overtime-rate').value) || 1.5;
-            const actualDate = document.getElementById('entry-date').value;
-
-            if (hours <= 0) return;
-
-            shiftLogs.push({ id: Date.now().toString(), date: actualDate, type, hours, multiplier });
-            saveState();
-            renderSummaryAndTable();
-            document.getElementById('overtime-hours').value = '1';
-            updateEntryPreview();
-        });
-
-        window.deleteShiftEntry = function(id) {
-            shiftLogs = shiftLogs.filter(item => item.id !== id);
-            saveState();
-            renderSummaryAndTable();
+      function readLegacyLocalData() {
+        let logs = [];
+        try { logs = JSON.parse(localStorage.getItem("salary_logs") || "[]"); } catch (_) {}
+        return {
+          base_salary: Number(localStorage.getItem("salary_base") || 6000),
+          kpi_bonus: Number(localStorage.getItem("salary_kpi") || 500),
+          shifts: logs,
+          avatar: localStorage.getItem("user_avatar") || null,
+          theme: localStorage.getItem("theme") || "dark"
         };
+      }
 
-        document.getElementById('clear-all-btn').addEventListener('click', function() {
-            if (shiftLogs.length === 0) return;
-            shiftLogs = [];
-            saveState();
-            renderSummaryAndTable();
-        });
+      async function loadCloudState() {
+        message("");
+        const { data, error } = await sb.from("user_data")
+          .select("base_salary,kpi_bonus,shifts,avatar,theme")
+          .eq("user_id", currentUser.id).maybeSingle();
+        if (error) throw error;
+        cloudLoaded = true;
 
-        window.onload = function() {
-            loadState();
-            initDatePicker();
-            updateEgyptTime();
-            setInterval(updateEgyptTime, 1000);
-            updateEntryPreview();
-            renderSummaryAndTable();
+        if (data) {
+          baseSalary = Number(data.base_salary ?? 6000);
+          kpiBonus = Number(data.kpi_bonus ?? 500);
+          shiftLogs = Array.isArray(data.shifts) ? data.shifts : [];
+          userAvatar = data.avatar || null;
+          isDarkMode = data.theme !== "light";
+        } else {
+          // استيراد بيانات الجهاز القديم مرة واحدة عند أول دخول فقط.
+          const old = readLegacyLocalData();
+          baseSalary = old.base_salary;
+          kpiBonus = old.kpi_bonus;
+          shiftLogs = old.shifts;
+          userAvatar = old.avatar;
+          isDarkMode = old.theme !== "light";
+          await saveCloudState(true);
+        }
+        $("base-salary-input").value = baseSalary;
+        $("kpi-input").value = kpiBonus;
+        $("work-days-input").value = 26;
+        $("shift-hours-input").value = 8;
+        applyTheme();
+        applyAvatar(userAvatar);
+        renderSummaryAndTable();
+        updateEntryPreview();
+      }
+
+      async function saveCloudState(showStatus=false) {
+        if (!currentUser || !cloudLoaded || !sb) return;
+        const payload = {
+          user_id: currentUser.id,
+          base_salary: baseSalary,
+          kpi_bonus: kpiBonus,
+          shifts: shiftLogs,
+          avatar: userAvatar,
+          theme: isDarkMode ? "dark" : "light",
+          updated_at: new Date().toISOString()
         };
+        const { error } = await sb.from("user_data").upsert(payload, { onConflict: "user_id" });
+        if (error) {
+          console.error("Cloud save failed:", error);
+          if (showStatus) alert("لم يتم حفظ البيانات على السحابة: " + error.message);
+          return;
+        }
+        if (showStatus) console.info("Cloud save complete");
+      }
+      function saveState() {
+        if (!currentUser || !cloudLoaded) return;
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => saveCloudState(false), 500);
+      }
+
+      function toggleDarkMode() {
+        isDarkMode = !isDarkMode;
+        applyTheme();
+        saveState();
+      }
+      function applyTheme() {
+        document.documentElement.classList.toggle("dark", isDarkMode);
+        if ($("dark-mode-icon")) {
+          $("dark-mode-icon").className = isDarkMode ? "fa-solid fa-sun text-amber-400 text-lg" : "fa-solid fa-moon text-sky-300 text-lg";
+          $("dark-mode-text").textContent = isDarkMode ? "الوضع النهاري" : "الوضع الليلي";
+        }
+      }
+
+      $("avatar-input").addEventListener("change", function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 700 * 1024) {
+          alert("حجم الصورة كبير. اختار صورة أقل من 700 كيلوبايت.");
+          e.target.value = "";
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = evt => {
+          userAvatar = evt.target.result;
+          applyAvatar(userAvatar);
+          saveState();
+        };
+        reader.readAsDataURL(file);
+      });
+      function applyAvatar(src) {
+        const splashContainer = $("splash-avatar-container");
+        const headerContainer = $("header-avatar-container");
+        if (!splashContainer || !headerContainer) return;
+        if (src) {
+          splashContainer.innerHTML = `<img src="${src}" alt="Profile">`;
+          headerContainer.innerHTML = `<img src="${src}" alt="Profile" class="w-full h-full object-cover">`;
+          $("remove-avatar-btn").classList.remove("hidden");
+        } else {
+          splashContainer.innerHTML = `<span id="splash-avatar-text">Yehia</span>`;
+          headerContainer.innerHTML = `<span class="text-sky-400 font-bold text-sm">YA</span>`;
+          $("remove-avatar-btn").classList.add("hidden");
+        }
+      }
+      function removeAvatar() {
+        userAvatar = null;
+        $("avatar-input").value = "";
+        applyAvatar(null);
+        saveState();
+      }
+      window.removeAvatar = removeAvatar;
+
+      function updateEgyptTime() {
+        const now = new Date();
+        $("egypt-time").textContent = new Intl.DateTimeFormat("ar-EG", {
+          timeZone: "Africa/Cairo", hour: "2-digit", minute: "2-digit",
+          second: "2-digit", hour12: true
+        }).format(now);
+        $("egypt-date").textContent = new Intl.DateTimeFormat("ar-EG", {
+          timeZone: "Africa/Cairo", weekday: "long", year: "numeric",
+          month: "long", day: "numeric"
+        }).format(now);
+      }
+      function initDatePicker() {
+        const now = new Date();
+        $("entry-date").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+      }
+      function calculateRates() {
+        const dailyRate = baseSalary / 26;
+        return { dailyRate, hourlyRate: dailyRate / 8 };
+      }
+      function updateEntryPreview() {
+        const { hourlyRate } = calculateRates();
+        const hours = parseFloat($("overtime-hours").value) || 0;
+        const multiplier = parseFloat($("overtime-rate").value) || 1.5;
+        $("entry-preview-amount").textContent = (hours * hourlyRate * multiplier).toFixed(2) + " ج.م";
+      }
+      function renderSummaryAndTable() {
+        const { dailyRate, hourlyRate } = calculateRates();
+        let totalPay = 0, totalHours = 0;
+        shiftLogs.forEach(item => {
+          totalPay += Number(item.hours) * hourlyRate * Number(item.multiplier);
+          totalHours += Number(item.hours);
+        });
+        const net = baseSalary + kpiBonus + totalPay;
+        $("card-base-salary").textContent = baseSalary.toLocaleString("ar-EG") + " ج.م";
+        $("card-daily-rate").textContent = dailyRate.toFixed(2) + " ج.م";
+        $("card-hourly-rate").textContent = hourlyRate.toFixed(2) + " ج.م";
+        $("card-kpi-bonus").textContent = kpiBonus.toFixed(2) + " ج.م";
+        $("card-total-overtime-pay").textContent = totalPay.toFixed(2) + " ج.م";
+        $("card-total-overtime-hours").textContent = totalHours + " ساعة";
+        $("card-net-salary").textContent = net.toFixed(2) + " ج.م";
+        $("footer-base-salary").textContent = baseSalary.toFixed(2) + " ج.م";
+        $("footer-kpi-bonus").textContent = kpiBonus.toFixed(2) + " ج.م";
+        $("footer-total-hours").textContent = totalHours + " ساعة";
+        $("footer-total-overtime").textContent = totalPay.toFixed(2) + " ج.م";
+        $("footer-shift-count").textContent = shiftLogs.length + " شيفت";
+        $("footer-final-total").textContent = net.toFixed(2) + " ج.م";
+
+        const tbody = $("shifts-tbody"), empty = $("empty-state");
+        tbody.innerHTML = "";
+        if (!shiftLogs.length) { empty.classList.remove("hidden"); return; }
+        empty.classList.add("hidden");
+        [...shiftLogs].sort((a,b) => new Date(b.date)-new Date(a.date)).forEach(item => {
+          const pay = Number(item.hours) * hourlyRate * Number(item.multiplier);
+          const badge = item.type === "Morning"
+            ? '<span class="bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-bold border border-amber-200 dark:border-amber-800">☀️ صباحي</span>'
+            : item.type === "Night"
+            ? '<span class="bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs font-bold border border-indigo-200 dark:border-indigo-800">🌙 مسائي</span>'
+            : '<span class="bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-bold border border-purple-200 dark:border-purple-800">🌌 أوفر نايت</span>';
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
+          const cells = [
+            item.date, badge, `${item.hours} ساعة`,
+            Number(item.multiplier) === 1.5 ? "ساعة ونصف (1.5x)" : "ساعتين (2.0x)",
+            `${pay.toFixed(2)} ج.م`
+          ];
+          tr.innerHTML = `<td class="py-3 px-4 font-bold text-slate-800 dark:text-slate-200">${cells[0]}</td>
+            <td class="py-3 px-4">${cells[1]}</td>
+            <td class="py-3 px-4 font-bold text-slate-700 dark:text-slate-300">${cells[2]}</td>
+            <td class="py-3 px-4 text-xs font-semibold text-slate-600 dark:text-slate-400">${cells[3]}</td>
+            <td class="py-3 px-4 font-extrabold text-emerald-600 dark:text-emerald-400">${cells[4]}</td>
+            <td class="py-3 px-4 text-center"><button onclick="deleteShiftEntry('${String(item.id).replace(/'/g,"")}')" class="text-rose-500 hover:text-rose-700 p-1" title="حذف"><i class="fa-solid fa-trash-can"></i></button></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      $("base-salary-input").addEventListener("input", e => {
+        baseSalary = parseFloat(e.target.value) || 0;
+        saveState(); renderSummaryAndTable(); updateEntryPreview();
+      });
+      $("kpi-input").addEventListener("input", e => {
+        kpiBonus = parseFloat(e.target.value) || 0;
+        saveState(); renderSummaryAndTable();
+      });
+      $("work-days-input").addEventListener("input", e => e.target.value = 26);
+      $("shift-hours-input").addEventListener("input", e => e.target.value = 8);
+      $("overtime-hours").addEventListener("input", updateEntryPreview);
+      $("overtime-rate").addEventListener("change", updateEntryPreview);
+      $("shift-form").addEventListener("submit", e => {
+        e.preventDefault();
+        const hours = parseFloat($("overtime-hours").value) || 0;
+        if (hours <= 0) return;
+        shiftLogs.push({
+          id: (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString()),
+          date: $("entry-date").value,
+          type: $("shift-type").value,
+          hours,
+          multiplier: parseFloat($("overtime-rate").value) || 1.5
+        });
+        saveState(); renderSummaryAndTable();
+        $("overtime-hours").value = "1";
+        updateEntryPreview();
+      });
+      window.deleteShiftEntry = id => {
+        shiftLogs = shiftLogs.filter(item => item.id !== id);
+        saveState(); renderSummaryAndTable();
+      };
+      $("clear-all-btn").addEventListener("click", () => {
+        if (!shiftLogs.length || !confirm("متأكد إنك عايز تمسح كل الشيفتات؟")) return;
+        shiftLogs = []; saveState(); renderSummaryAndTable();
+      });
+
+      // أخفِ لوحة التحكم إلى أن يتم التحقق من جلسة المستخدم.
+      hideDashboard();
+      window.addEventListener("load", async () => {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session?.user) {
+          try { await startUserSession(session.user); }
+          catch (err) { message("تعذر تحميل بياناتك: " + err.message, true); }
+        } else {
+          showAuth("login");
+        }
+        sb.auth.onAuthStateChange((_event, session) => {
+          if (!session) hideDashboard();
+        });
+      });
     </script>
+
+
+    <!-- تسجيل الدخول وإنشاء الحساب -->
+    <div id="auth-screen" class="fixed inset-0 z-[100000] bg-slate-950 flex items-center justify-center p-4">
+      <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="text-center mb-6">
+          <div class="text-3xl font-black text-sky-400">OverShift ⚡</div>
+          <p class="text-slate-400 text-sm mt-2">سجّل دخولك لمزامنة بياناتك على كل أجهزتك</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-800 mb-5">
+          <button id="show-login" class="py-2 rounded-lg bg-sky-600 text-white font-bold">تسجيل الدخول</button>
+          <button id="show-signup" class="py-2 rounded-lg text-slate-300 font-bold">إنشاء حساب</button>
+        </div>
+        <form id="login-form" class="space-y-3">
+          <label class="block text-sm text-slate-300">اسم المستخدم</label>
+          <input id="login-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="Username">
+          <label class="block text-sm text-slate-300">كلمة المرور</label>
+          <input id="login-password" type="password" autocomplete="current-password" required minlength="8" maxlength="72" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="••••••••">
+          <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 rounded-xl p-3 text-white font-bold">دخول</button>
+        </form>
+        <form id="signup-form" class="space-y-3 hidden">
+          <label class="block text-sm text-slate-300">الاسم الظاهر</label>
+          <input id="signup-name" type="text" autocomplete="name" maxlength="60" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="اسمك (اختياري)">
+          <label class="block text-sm text-slate-300">اسم المستخدم</label>
+          <input id="signup-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="حروف إنجليزية وأرقام و _ فقط">
+          <p class="text-[11px] text-slate-500 -mt-2">من 3 إلى 24 حرفاً، بدون مسافات.</p>
+          <label class="block text-sm text-slate-300">كلمة المرور (8 أحرف على الأقل)</label>
+          <input id="signup-password" type="password" autocomplete="new-password" required minlength="8" maxlength="72" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="••••••••">
+          <label class="block text-sm text-slate-300">كود الدعوة</label>
+          <input id="invite-code" type="password" inputmode="numeric" autocomplete="off" required class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white tracking-widest" placeholder="أدخل كود الدعوة">
+          <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl p-3 text-white font-bold">إنشاء الحساب</button>
+        </form>
+        <p id="auth-message" role="status" class="text-sm text-center mt-4 text-amber-300"></p>
+        <p class="text-[11px] text-slate-500 text-center mt-5">بياناتك محفوظة على السحابة ومحمية بحسابك. استخدم نفس اسم المستخدم وكلمة المرور على كل أجهزتك.</p>
+      </div>
+    </div>
+    <div id="account-bar" class="hidden max-w-7xl mx-auto w-full px-4 pt-4 flex items-center justify-between text-xs text-slate-400">
+      <span id="signed-in-email"></span>
+      <button id="logout-btn" class="px-3 py-2 rounded-lg border border-slate-700 text-rose-300 hover:bg-rose-950/40">تسجيل الخروج</button>
+    </div>
 </body>
 </html>
