@@ -1040,6 +1040,147 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
+<!-- WELCOME SCREEN ADD-ON -->
+<style>
+#welcome-overlay {
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:radial-gradient(circle at center,#172554,#020617);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-family:'Cairo',sans-serif;
+  padding:20px;
+}
+#welcome-overlay.active {
+  display:flex;
+}
+#welcome-overlay .welcome-content {
+  animation:welcomeFade 1s ease;
+}
+#welcome-overlay .welcome-avatar {
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  border:4px solid #38bdf8;
+  object-fit:cover;
+  margin:25px auto;
+  box-shadow:0 0 35px #0284c755;
+}
+#welcome-overlay .welcome-title {
+  color:white;
+  font-size:34px;
+  font-weight:900;
+}
+#welcome-overlay .welcome-name {
+  color:#38bdf8;
+  font-size:23px;
+  font-weight:800;
+  margin-top:12px;
+}
+#welcome-overlay .welcome-subtitle {
+  color:#94a3b8;
+  margin-top:12px;
+  font-size:14px;
+}
+@keyframes welcomeFade {
+  from {opacity:0;transform:translateY(20px)}
+  to {opacity:1;transform:translateY(0)}
+}
+</style>
 
+<div id="welcome-overlay">
+  <div class="welcome-content">
+    <div class="welcome-title">WELCOME BACK</div>
+    <img id="welcome-photo"
+      class="welcome-avatar"
+      alt="Profile">
+    <div id="welcome-user" class="welcome-name">
+      Welcome!
+    </div>
+    <div class="welcome-subtitle">
+      سعيد بعودتك إلى Over Shift ⚡
+    </div>
+    <div style="color:#38bdf8;margin-top:25px;font-size:13px">
+      Preparing your dashboard...
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  const overlay = document.getElementById("welcome-overlay");
+  const auth = document.getElementById("auth-screen");
+
+  let welcomeTimer = null;
+  let wasLoggedIn = false;
+
+  const observer = new MutationObserver(function() {
+
+    if (!auth) return;
+
+    const loggedIn = auth.classList.contains("hidden");
+
+    if (loggedIn && !wasLoggedIn) {
+
+      wasLoggedIn = true;
+
+      clearTimeout(welcomeTimer);
+
+      const name = document.getElementById("signed-in-name");
+      const avatar = document.getElementById("header-avatar-container");
+
+      document.getElementById("welcome-user").textContent =
+        name ? name.textContent.replace("أهلاً،","").trim() : "Welcome!";
+
+      const image = avatar ? avatar.querySelector("img") : null;
+
+      document.getElementById("welcome-photo").src =
+        image ? image.src :
+        "data:image/svg+xml," + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="125" height="125"><rect width="100%" height="100%" fill="#1e293b"/><text x="50%" y="58%" text-anchor="middle" font-size="38" fill="#38bdf8">YA</text></svg>'
+        );
+
+      overlay.classList.add("active");
+
+      document.getElementById("account-bar").classList.add("hidden");
+      document.getElementById("app-header").classList.add("hidden");
+      document.getElementById("app-main").classList.add("hidden");
+      document.getElementById("app-footer").classList.add("hidden");
+
+      welcomeTimer = setTimeout(function() {
+
+        overlay.classList.remove("active");
+
+        document.getElementById("account-bar").classList.remove("hidden");
+        document.getElementById("app-header").classList.remove("hidden");
+        document.getElementById("app-main").classList.remove("hidden");
+        document.getElementById("app-footer").classList.remove("hidden");
+
+      }, 2000);
+
+    }
+
+    if (!loggedIn) {
+
+      wasLoggedIn = false;
+      clearTimeout(welcomeTimer);
+      overlay.classList.remove("active");
+
+    }
+
+  });
+
+  observer.observe(auth, {
+    attributes:true,
+    attributeFilter:["class"]
+  });
+
+});
+
+</script>
 </body>
 </html>
