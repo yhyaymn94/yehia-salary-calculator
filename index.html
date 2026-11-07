@@ -4,631 +4,1317 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Over Shift _ Yehia Ayman</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
-tailwind.config={darkMode:'class',theme:{extend:{fontFamily:{cairo:['Cairo','sans-serif']},colors:{brand:{50:'#f0f9ff',100:'#e0f2fe',500:'#0284c7',600:'#0369a1',700:'#075985',800:'#0c4a6e'}}}}}
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      fontFamily: { cairo: ['Cairo', 'sans-serif'] },
+      colors: {
+        brand: {
+          50:'#f0f9ff',100:'#e0f2fe',500:'#0284c7',
+          600:'#0369a1',700:'#075985',800:'#0c4a6e'
+        }
+      }
+    }
+  }
+}
 </script>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 body{font-family:'Cairo',sans-serif}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:#1e293b}
 ::-webkit-scrollbar-thumb{background:#475569;border-radius:4px}
 .hidden{display:none!important}
-.auth-bg{background:radial-gradient(circle at center,#1e293b 0%,#020617 100%)}
+.auth-bg{
+  background:radial-gradient(circle at center,#1e293b 0%,#020617 100%);
+}
 </style>
 </head>
+
 <body class="bg-slate-950 text-slate-100 min-h-screen">
 
+<!-- شاشة الحساب -->
 <div id="auth-screen" class="fixed inset-0 z-50 auth-bg flex items-center justify-center p-4">
-<div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
-<div class="text-center mb-6">
-<div class="text-4xl font-black text-sky-400">OverShift ⚡</div>
-<p class="text-slate-400 text-sm mt-2">سجّل دخولك للوصول إلى لوحة التحكم الخاصة بك</p>
-</div>
-<div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-800 mb-5">
-<button id="show-login" class="py-2 rounded-lg bg-sky-600 text-white font-bold">تسجيل الدخول</button>
-<button id="show-signup" class="py-2 rounded-lg text-slate-300 font-bold">إنشاء حساب</button>
-</div>
-<form id="login-form" class="space-y-3">
-<label class="block text-sm text-slate-300">اسم المستخدم</label>
-<input id="login-username" type="text" required minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="Username">
-<label class="block text-sm text-slate-300">كلمة المرور</label>
-<input id="login-password" type="password" required minlength="8" maxlength="72" autocomplete="current-password" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="••••••••">
-<button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 rounded-xl p-3 text-white font-bold">دخول</button>
-</form>
-<form id="signup-form" class="space-y-3 hidden">
-<label class="block text-sm text-slate-300">الاسم الظاهر</label>
-<input id="signup-name" type="text" maxlength="60" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="اسمك">
-<label class="block text-sm text-slate-300">اسم المستخدم</label>
-<input id="signup-username" type="text" required minlength="3" maxlength="24" autocomplete="username" autocapitalize="none" spellcheck="false" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="حروف إنجليزية وأرقام و _ فقط">
-<p class="text-xs text-slate-500">من 3 إلى 24 حرفاً، بدون مسافات.</p>
-<label class="block text-sm text-slate-300">كلمة المرور</label>
-<input id="signup-password" type="password" required minlength="8" maxlength="72" autocomplete="new-password" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white" placeholder="8 أحرف على الأقل">
-<label class="block text-sm text-slate-300">كود الدعوة</label>
-<input id="invite-code" type="password" inputmode="numeric" required autocomplete="off" class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white tracking-widest" placeholder="أدخل كود الدعوة">
-<button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl p-3 text-white font-bold">إنشاء الحساب</button>
-</form>
-<p id="auth-message" role="status" class="text-sm text-center mt-4 text-amber-300"></p>
-<p class="text-xs text-slate-500 text-center mt-5">بياناتك محفوظة على السحابة ومحمية بحسابك. استخدم نفس بيانات الدخول على كل أجهزتك.</p>
-</div>
+  <div class="w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl">
+    <div class="text-center mb-6">
+      <div class="text-4xl font-black text-sky-400">OverShift ⚡</div>
+      <p class="text-slate-400 text-sm mt-2">سجّل دخولك للوصول إلى لوحة التحكم الخاصة بك</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-2 p-1 rounded-xl bg-slate-800 mb-5">
+      <button id="show-login" class="py-2 rounded-lg bg-sky-600 text-white font-bold">تسجيل الدخول</button>
+      <button id="show-signup" class="py-2 rounded-lg text-slate-300 font-bold">إنشاء حساب</button>
+    </div>
+
+    <form id="login-form" class="space-y-3">
+      <label class="block text-sm text-slate-300">اسم المستخدم</label>
+      <input id="login-username" type="text" required minlength="3" maxlength="24"
+        autocomplete="username" autocapitalize="none" spellcheck="false"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white"
+        placeholder="Username">
+
+      <label class="block text-sm text-slate-300">كلمة المرور</label>
+      <input id="login-password" type="password" required minlength="8" maxlength="72"
+        autocomplete="current-password"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white"
+        placeholder="••••••••">
+
+      <button type="submit" class="w-full bg-sky-600 hover:bg-sky-700 rounded-xl p-3 text-white font-bold">
+        دخول
+      </button>
+    </form>
+
+    <form id="signup-form" class="space-y-3 hidden">
+      <label class="block text-sm text-slate-300">الاسم الظاهر</label>
+      <input id="signup-name" type="text" maxlength="60"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white"
+        placeholder="اسمك">
+
+      <label class="block text-sm text-slate-300">اسم المستخدم</label>
+      <input id="signup-username" type="text" required minlength="3" maxlength="24"
+        autocomplete="username" autocapitalize="none" spellcheck="false"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white"
+        placeholder="حروف إنجليزية وأرقام و _ فقط">
+
+      <p class="text-xs text-slate-500">من 3 إلى 24 حرفاً، بدون مسافات.</p>
+
+      <label class="block text-sm text-slate-300">كلمة المرور</label>
+      <input id="signup-password" type="password" required minlength="8" maxlength="72"
+        autocomplete="new-password"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white"
+        placeholder="8 أحرف على الأقل">
+
+      <label class="block text-sm text-slate-300">كود الدعوة</label>
+      <input id="invite-code" type="password" inputmode="numeric" required
+        autocomplete="off"
+        class="w-full rounded-xl bg-slate-800 border border-slate-700 p-3 text-white tracking-widest"
+        placeholder="أدخل كود الدعوة">
+
+      <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 rounded-xl p-3 text-white font-bold">
+        إنشاء الحساب
+      </button>
+    </form>
+
+    <p id="auth-message" role="status" class="text-sm text-center mt-4 text-amber-300"></p>
+
+    <p class="text-xs text-slate-500 text-center mt-5">
+      بياناتك محفوظة على السحابة ومحمية بحسابك.
+      استخدم نفس بيانات الدخول على كل أجهزتك.
+    </p>
+  </div>
 </div>
 
+<!-- شريط الحساب -->
 <div id="account-bar" class="hidden max-w-7xl mx-auto w-full px-4 pt-4 flex items-center justify-between text-sm text-slate-400">
-<span id="signed-in-name">أهلاً بك</span>
-<button id="logout-btn" class="px-3 py-2 rounded-lg border border-slate-700 text-rose-300 hover:bg-rose-950/40"><i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج</button>
+  <span id="signed-in-name">أهلاً بك</span>
+  <button id="logout-btn" class="px-3 py-2 rounded-lg border border-slate-700 text-rose-300 hover:bg-rose-950/40">
+    <i class="fa-solid fa-right-from-bracket ml-1"></i> تسجيل الخروج
+  </button>
 </div>
 
+<!-- الهيدر -->
 <header id="app-header" class="hidden bg-gradient-to-r from-slate-900 via-brand-800 to-slate-900 shadow-lg border-b border-slate-700">
-<div class="max-w-7xl mx-auto px-4 py-6">
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-<div class="flex items-center gap-4">
-<div id="header-avatar-container" class="w-14 h-14 rounded-full border-2 border-sky-400 bg-slate-800 flex items-center justify-center overflow-hidden"><span class="text-sky-400 font-bold">YA</span></div>
-<div>
-<h1 class="text-2xl sm:text-3xl font-extrabold text-white"><i class="fa-solid fa-calculator text-sky-400"></i> Over Shift</h1>
-<div class="text-xs text-slate-300 mt-1">تطوير وتصميم: <span class="text-sky-300 font-bold">Yehia Ayman</span></div>
-</div>
-</div>
-<div class="flex items-center gap-3">
-<button onclick="toggleDarkMode()" class="p-3 bg-slate-800 text-sky-300 rounded-xl border border-slate-700"><i id="dark-mode-icon" class="fa-solid fa-sun"></i><span id="dark-mode-text">الوضع النهاري</span></button>
-<div class="bg-slate-800 px-4 py-3 rounded-xl border border-slate-700">
-<div class="text-xs text-slate-400">التوقيت المحلي في مصر</div>
-<div id="egypt-time" class="font-bold text-sky-300">--:--:--</div>
-<div id="egypt-date" class="text-xs text-slate-300">---</div>
-</div>
-</div>
-</div>
-</div>
+  <div class="max-w-7xl mx-auto px-4 py-6">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+      <div class="flex items-center gap-4">
+        <div id="header-avatar-container" class="w-14 h-14 rounded-full border-2 border-sky-400 bg-slate-800 flex items-center justify-center overflow-hidden">
+          <span class="text-sky-400 font-bold">YA</span>
+        </div>
+
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white">
+            <i class="fa-solid fa-calculator text-sky-400"></i>
+            Over Shift
+          </h1>
+          <div class="text-xs text-slate-300 mt-1">
+            تطوير وتصميم: <span class="text-sky-300 font-bold">Yehia Ayman</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="toggleDarkMode()" class="p-3 bg-slate-800 text-sky-300 rounded-xl border border-slate-700">
+          <i id="dark-mode-icon" class="fa-solid fa-sun"></i>
+          <span id="dark-mode-text">الوضع النهاري</span>
+        </button>
+
+        <div class="bg-slate-800 px-4 py-3 rounded-xl border border-slate-700">
+          <div class="text-xs text-slate-400">التوقيت المحلي في مصر</div>
+          <div id="egypt-time" class="font-bold text-sky-300">--:--:--</div>
+          <div id="egypt-date" class="text-xs text-slate-300">---</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
+<!-- لوحة التحكم -->
 <main id="app-main" class="hidden max-w-7xl mx-auto px-4 py-8 w-full">
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-<div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
-<div class="text-sm text-slate-500 dark:text-slate-400">المرتب الأساسي</div>
-<div id="card-base-salary" class="text-2xl font-extrabold mt-2">6,000 ج.م</div>
-<div class="text-xs text-slate-400 mt-1">معدل اليوم: <span id="card-daily-rate">230.77</span></div>
-</div>
-<div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
-<div class="text-sm text-slate-500 dark:text-slate-400">أجر الساعة الأساسي</div>
-<div id="card-hourly-rate" class="text-2xl font-extrabold mt-2">28.85 ج.م</div>
-<div class="text-xs text-slate-400 mt-1">على أساس 8 ساعات يومياً</div>
-</div>
-<div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
-<div class="text-sm text-slate-500 dark:text-slate-400">مكافأة KPI</div>
-<div id="card-kpi-bonus" class="text-2xl font-extrabold text-amber-500 mt-2">500.00 ج.م</div>
-<div class="text-xs text-slate-400 mt-1">حافز الأداء الشهري</div>
-</div>
-<div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
-<div class="text-sm text-slate-500 dark:text-slate-400">إجمالي الإضافي</div>
-<div id="card-total-overtime-pay" class="text-2xl font-extrabold text-emerald-500 mt-2">0.00 ج.م</div>
-<div class="text-xs text-slate-400 mt-1">الساعات: <span id="card-total-overtime-hours">0</span></div>
-</div>
-<div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md">
-<div class="text-sm text-sky-200">الصافي المستحق</div>
-<div id="card-net-salary" class="text-3xl font-extrabold mt-2">6,500.00 ج.م</div>
-<div class="text-xs text-sky-200 mt-1">أساسي + KPI + إضافي + تعويضات − الخصومات − الغياب</div>
-</div>
-</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-<section class="lg:col-span-4 bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-700 h-fit">
-<h2 class="text-lg font-bold mb-5 pb-3 border-b border-slate-700"><i class="fa-solid fa-sliders text-sky-500"></i> إعدادات الحسبة</h2>
-<div class="space-y-4">
-<div class="p-3 bg-sky-50 dark:bg-sky-950/30 rounded-xl border border-sky-200 dark:border-sky-900">
-<label class="block text-xs font-bold mb-2">الصورة الشخصية</label>
-<input type="file" id="avatar-input" accept="image/*" class="hidden">
-<div class="flex gap-2">
-<button type="button" onclick="document.getElementById('avatar-input').click()" class="flex-1 py-2 bg-white dark:bg-slate-800 border border-slate-500 rounded-lg text-xs font-bold"><i class="fa-solid fa-upload"></i> اختيار صورة</button>
-<button type="button" id="remove-avatar-btn" onclick="removeAvatar()" class="hidden p-2 text-rose-500 border border-rose-500 rounded-lg"><i class="fa-solid fa-trash"></i></button>
-</div>
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">المرتب الشهري (جنيه)</label>
-<input type="number" id="base-salary-input" min="0" step="100" value="6000" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">حافز KPI (جنيه)</label>
-<input type="number" id="kpi-input" min="0" step="50" value="500" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">عدد أيام العمل في الشهر</label>
-<input type="number" id="work-days-input" value="26" disabled class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 font-bold opacity-70">
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">ساعات الشيفت الأساسي اليومي</label>
-<input type="number" id="shift-hours-input" value="8" disabled class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 font-bold opacity-70">
-</div>
-<div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs leading-7">
-<i class="fa-solid fa-calculator text-sky-500"></i> المعادلة المعتمدة:
-<br>اليوم = المرتب ÷ 26 يوم
-<br>الساعة = اليوم ÷ 8 ساعات
-</div>
-</div>
-</section>
+  <!-- كروت الملخص -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
 
-<section class="lg:col-span-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-700">
-<h2 class="text-lg font-bold mb-5 pb-3 border-b border-slate-700"><i class="fa-solid fa-calendar-plus text-sky-500"></i> إضافة شيفت / وقت إضافي</h2>
-<form id="shift-form" class="space-y-4">
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div>
-<label class="block text-xs font-bold mb-1">التاريخ</label>
-<input type="date" id="entry-date" required class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">نوع الشيفت</label>
-<select id="shift-type" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
-<option value="Morning">☀️ شيفت صباحي</option>
-<option value="Night">🌙 شيفت مسائي</option>
-<option value="Overnight">🌌 أوفر نايت</option>
-</select>
-</div>
-</div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div>
-<label class="block text-xs font-bold mb-1">عدد الساعات الإضافية</label>
-<input type="number" id="overtime-hours" min="0.5" step="0.5" value="1" required class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">حساب الساعة الإضافية</label>
-<select id="overtime-rate" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
-<option value="1.5">ساعة ونصف (1.5x)</option>
-<option value="2">ساعتين (2.0x)</option>
-</select>
-</div>
-</div>
-<div class="p-3 bg-sky-50 dark:bg-sky-950/40 rounded-xl flex items-center justify-between text-sm">
-<span>معاينة إضافي هذا اليوم:</span>
-<span id="entry-preview-amount" class="font-bold text-sky-600">43.27 ج.م</span>
-</div>
-<button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl"><i class="fa-solid fa-plus-circle"></i> تسجيل اليوم في السجل</button>
-</form>
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
+      <div class="text-sm text-slate-500 dark:text-slate-400">المرتب الأساسي</div>
+      <div id="card-base-salary" class="text-2xl font-extrabold mt-2">6,000 ج.م</div>
+      <div class="text-xs text-slate-400 mt-1">معدل اليوم: <span id="card-daily-rate">230.77</span></div>
+    </div>
 
-<div class="mt-8 p-5 rounded-2xl border border-slate-700 bg-slate-50 dark:bg-slate-800/60">
-<h3 class="font-extrabold text-lg mb-4"><i class="fa-solid fa-scale-balanced text-sky-500"></i> التعويضات والخصومات والغياب</h3>
-<form id="adjustment-form" class="space-y-4">
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-<div>
-<label class="block text-xs font-bold mb-1">نوع الحركة</label>
-<select id="adjustment-kind" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
-<option value="absence">خصم غياب من الأساسي</option>
-<option value="compensation">تعويض / إضافة مبلغ</option>
-<option value="deduction">خصم إضافي</option>
-</select>
-</div>
-<div>
-<label class="block text-xs font-bold mb-1">التاريخ</label>
-<input type="date" id="adjustment-date" required class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
-</div>
-</div>
-<div id="absence-fields">
-<label class="block text-xs font-bold mb-1">عدد أيام الغياب</label>
-<input type="number" id="absence-days" min="0.5" max="26" step="0.5" value="1" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
-<p class="text-xs text-slate-500 mt-2">اكتب نصف يوم أو يوم أو يومين أو 3 أيام، ويمكنك إدخال أي عدد بنصف يوم.</p>
-</div>
-<div id="adjustment-amount-fields" class="hidden">
-<label id="adjustment-amount-label" class="block text-xs font-bold mb-1">المبلغ بالجنيه</label>
-<input type="number" id="adjustment-amount" min="0.01" step="0.01" placeholder="مثال: 150" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
-</div>
-<div class="p-3 rounded-xl bg-sky-100 dark:bg-sky-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
-<span id="adjustment-preview-label">قيمة خصم الغياب المتوقعة:</span>
-<strong id="adjustment-preview" class="text-sky-700 dark:text-sky-300">230.77 ج.م</strong>
-</div>
-<button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold"><i class="fa-solid fa-plus-circle"></i> تسجيل الحركة وحفظها</button>
-</form>
-</div>
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
+      <div class="text-sm text-slate-500 dark:text-slate-400">أجر الساعة الأساسي</div>
+      <div id="card-hourly-rate" class="text-2xl font-extrabold mt-2">28.85 ج.م</div>
+      <div class="text-xs text-slate-400 mt-1">على أساس 8 ساعات يومياً</div>
+    </div>
 
-<div class="mt-8">
-<div class="flex items-center justify-between mb-4 gap-2">
-<h3 class="font-bold"><i class="fa-solid fa-list-check text-sky-500"></i> سجل الشيفتات</h3>
-<button id="clear-all-btn" class="text-xs text-rose-500 font-bold bg-rose-950/30 px-3 py-2 rounded-lg border border-rose-900"><i class="fa-solid fa-trash"></i> مسح كل السجل</button>
-</div>
-<div class="overflow-x-auto rounded-xl border border-slate-700">
-<table class="w-full text-right text-sm">
-<thead class="bg-slate-100 dark:bg-slate-800 font-bold">
-<tr><th class="p-3">التاريخ</th><th class="p-3">الشيفت</th><th class="p-3">الساعات</th><th class="p-3">المعامل</th><th class="p-3">المبلغ</th><th class="p-3 text-center">حذف</th></tr>
-</thead>
-<tbody id="shifts-tbody" class="divide-y divide-slate-700"></tbody>
-</table>
-<div id="empty-state" class="p-8 text-center text-slate-400"><i class="fa-regular fa-folder-open text-3xl mb-2 block"></i> لا توجد شيفتات مسجلة حتى الآن</div>
-</div>
-</div>
-</section>
-</div>
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
+      <div class="text-sm text-slate-500 dark:text-slate-400">مكافأة KPI</div>
+      <div id="card-kpi-bonus" class="text-2xl font-extrabold text-amber-500 mt-2">500.00 ج.م</div>
+      <div class="text-xs text-slate-400 mt-1">حافز الأداء الشهري</div>
+    </div>
 
-<section class="bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800">
-<h2 class="text-xl font-extrabold mb-5 text-sky-400"><i class="fa-solid fa-calculator"></i> الإجمالي الشامل المستحق</h2>
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">المرتب الأساسي</span><span id="footer-base-salary" class="text-lg font-bold">6,000.00 ج.م</span></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">حافز KPI</span><span id="footer-kpi-bonus" class="text-lg font-bold text-amber-400">500.00 ج.م</span></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">ساعات الإضافي</span><span id="footer-total-hours" class="text-lg font-bold text-sky-400">0 ساعة</span></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">مستحق الإضافي</span><span id="footer-total-overtime" class="text-lg font-bold text-emerald-400">0.00 ج.م</span></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">عدد الشيفتات</span><span id="footer-shift-count" class="text-lg font-bold text-purple-400">0 شيفت</span></div>
-</div>
-<div id="adjustment-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">التعويضات</span><strong id="summary-compensations" class="text-emerald-400">0.00 ج.م</strong></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">الخصومات الإضافية</span><strong id="summary-other-deductions" class="text-rose-400">0.00 ج.م</strong></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">أيام الغياب</span><strong id="summary-absence-days" class="text-amber-400">0 يوم</strong></div>
-<div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">خصم الغياب من الأساسي</span><strong id="summary-absence-deduction" class="text-rose-400">0.00 ج.م</strong></div>
-</div>
-<div class="bg-gradient-to-r from-sky-900/60 via-slate-800 to-sky-900/60 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
-<div><div class="text-sm text-sky-200">الصافي النهائي المستحق</div><div class="text-xs text-slate-400">أساسي + KPI + إضافي + تعويضات − الخصومات − الغياب</div></div>
-<div id="footer-final-total" class="text-3xl sm:text-4xl font-extrabold text-sky-300">6,500.00 ج.م</div>
-</div>
-</section>
+    <div class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-5 rounded-2xl border border-slate-700">
+      <div class="text-sm text-slate-500 dark:text-slate-400">إجمالي الإضافي</div>
+      <div id="card-total-overtime-pay" class="text-2xl font-extrabold text-emerald-500 mt-2">0.00 ج.م</div>
+      <div class="text-xs text-slate-400 mt-1">الساعات: <span id="card-total-overtime-hours">0</span></div>
+    </div>
+
+    <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md">
+      <div class="text-sm text-sky-200">الصافي المستحق</div>
+      <div id="card-net-salary" class="text-3xl font-extrabold mt-2">6,500.00 ج.م</div>
+      <div class="text-xs text-sky-200 mt-1">أساسي + KPI + إضافي + تعويضات − الخصومات − الغياب</div>
+    </div>
+
+  </div>
+
+  <!-- الإعدادات والسجل -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+
+    <!-- الإعدادات -->
+    <section class="lg:col-span-4 bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-700 h-fit">
+      <h2 class="text-lg font-bold mb-5 pb-3 border-b border-slate-700">
+        <i class="fa-solid fa-sliders text-sky-500"></i>
+        إعدادات الحسبة
+      </h2>
+
+      <div class="space-y-4">
+
+        <div class="p-3 bg-sky-50 dark:bg-sky-950/30 rounded-xl border border-sky-200 dark:border-sky-900">
+          <label class="block text-xs font-bold mb-2">الصورة الشخصية</label>
+          <input type="file" id="avatar-input" accept="image/*" class="hidden">
+          <div class="flex gap-2">
+            <button type="button" onclick="document.getElementById('avatar-input').click()"
+              class="flex-1 py-2 bg-white dark:bg-slate-800 border border-slate-500 rounded-lg text-xs font-bold">
+              <i class="fa-solid fa-upload"></i> اختيار صورة
+            </button>
+            <button type="button" id="remove-avatar-btn" onclick="removeAvatar()"
+              class="hidden p-2 text-rose-500 border border-rose-500 rounded-lg">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">المرتب الشهري (جنيه)</label>
+          <input type="number" id="base-salary-input" min="0" step="100" value="6000"
+            class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">حافز KPI (جنيه)</label>
+          <input type="number" id="kpi-input" min="0" step="50" value="500"
+            class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">عدد أيام العمل في الشهر</label>
+          <input type="number" id="work-days-input" value="26" disabled
+            class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 font-bold opacity-70">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold mb-1">ساعات الشيفت الأساسي اليومي</label>
+          <input type="number" id="shift-hours-input" value="8" disabled
+            class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-200 dark:bg-slate-800 font-bold opacity-70">
+        </div>
+
+        <div class="p-4 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs leading-7">
+          <i class="fa-solid fa-calculator text-sky-500"></i>
+          المعادلة المعتمدة:
+          <br>اليوم = المرتب ÷ 26 يوم
+          <br>الساعة = اليوم ÷ 8 ساعات
+        </div>
+      </div>
+    </section>
+
+    <!-- إضافة الشيفتات -->
+    <section class="lg:col-span-8 bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-700">
+
+      <h2 class="text-lg font-bold mb-5 pb-3 border-b border-slate-700">
+        <i class="fa-solid fa-calendar-plus text-sky-500"></i>
+        إضافة شيفت / وقت إضافي
+      </h2>
+
+      <form id="shift-form" class="space-y-4">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-1">التاريخ</label>
+            <input type="date" id="entry-date" required
+              class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">نوع الشيفت</label>
+            <select id="shift-type" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+              <option value="Morning">☀️ شيفت صباحي</option>
+              <option value="Night">🌙 شيفت مسائي</option>
+              <option value="Overnight">🌌 أوفر نايت</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold mb-1">عدد الساعات الإضافية</label>
+            <input type="number" id="overtime-hours" min="0.5" step="0.5" value="1" required
+              class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold mb-1">حساب الساعة الإضافية</label>
+            <select id="overtime-rate" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold">
+              <option value="1.5">ساعة ونصف (1.5x)</option>
+              <option value="2">ساعتين (2.0x)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3 bg-sky-50 dark:bg-sky-950/40 rounded-xl flex items-center justify-between text-sm">
+          <span>معاينة إضافي هذا اليوم:</span>
+          <span id="entry-preview-amount" class="font-bold text-sky-600">43.27 ج.م</span>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl">
+          <i class="fa-solid fa-plus-circle"></i>
+          تسجيل اليوم في السجل
+        </button>
+      </form>
+
+      <!-- التعويضات والخصومات والغياب -->
+      <div class="mt-8 p-5 rounded-2xl border border-slate-700 bg-slate-50 dark:bg-slate-800/60">
+        <h3 class="font-extrabold text-lg mb-4">
+          <i class="fa-solid fa-scale-balanced text-sky-500"></i>
+          التعويضات والخصومات والغياب
+        </h3>
+        <form id="adjustment-form" class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold mb-1">نوع الحركة</label>
+              <select id="adjustment-kind" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+                <option value="absence">خصم غياب من الأساسي</option>
+                <option value="compensation">تعويض / إضافة مبلغ</option>
+                <option value="deduction">خصم إضافي</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1">التاريخ</label>
+              <input type="date" id="adjustment-date" required class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900">
+            </div>
+          </div>
+          <div id="absence-fields" class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold mb-1">اختار مدة الخصم</label>
+              <select id="absence-days" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+                <option value="0.5">نصف يوم</option>
+                <option value="1" selected>يوم كامل</option>
+                <option value="2">يومين</option>
+                <option value="3">3 أيام</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1">سبب الخصم</label>
+              <input type="text" id="absence-reason" maxlength="120" required placeholder="مثال: غياب بدون إذن أو تأخير أو جزاء إداري" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+            </div>
+          </div>
+          <div id="adjustment-amount-fields" class="hidden">
+            <label id="adjustment-amount-label" class="block text-xs font-bold mb-1">المبلغ بالجنيه</label>
+            <input type="number" id="adjustment-amount" min="0.01" step="0.01" placeholder="مثال: 150" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+          </div>
+          <div class="p-3 rounded-xl bg-sky-100 dark:bg-sky-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
+            <span id="adjustment-preview-label">قيمة خصم الغياب المتوقعة:</span>
+            <strong id="adjustment-preview" class="text-sky-700 dark:text-sky-300">230.77 ج.م</strong>
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold">
+            <i class="fa-solid fa-plus-circle"></i> تسجيل الحركة وحفظها
+          </button>
+        </form>
+      </div>
+
+      <!-- جدول الشيفتات والحركات -->
+      <div class="mt-8">
+        <div class="flex items-center justify-between mb-4 gap-2">
+          <h3 class="font-bold">
+            <i class="fa-solid fa-list-check text-sky-500"></i>
+            سجل الشيفتات
+          </h3>
+
+          <button id="clear-all-btn" class="text-xs text-rose-500 font-bold bg-rose-950/30 px-3 py-2 rounded-lg border border-rose-900">
+            <i class="fa-solid fa-trash"></i> مسح كل السجل
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl border border-slate-700">
+          <table class="w-full text-right text-sm">
+            <thead class="bg-slate-100 dark:bg-slate-800 font-bold">
+              <tr>
+                <th class="p-3">التاريخ</th>
+                <th class="p-3">الشيفت</th>
+                <th class="p-3">الساعات</th>
+                <th class="p-3">المعامل</th>
+                <th class="p-3">المبلغ</th>
+                <th class="p-3 text-center">حذف</th>
+              </tr>
+            </thead>
+            <tbody id="shifts-tbody" class="divide-y divide-slate-700"></tbody>
+          </table>
+
+          <div id="empty-state" class="p-8 text-center text-slate-400">
+            <i class="fa-regular fa-folder-open text-3xl mb-2 block"></i>
+            لا توجد شيفتات مسجلة حتى الآن
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- الإجمالي -->
+  <section class="bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800">
+    <h2 class="text-xl font-extrabold mb-5 text-sky-400">
+      <i class="fa-solid fa-calculator"></i>
+      الإجمالي الشامل المستحق
+    </h2>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">المرتب الأساسي</span>
+        <span id="footer-base-salary" class="text-lg font-bold">6,000.00 ج.م</span>
+      </div>
+
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">حافز KPI</span>
+        <span id="footer-kpi-bonus" class="text-lg font-bold text-amber-400">500.00 ج.م</span>
+      </div>
+
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">ساعات الإضافي</span>
+        <span id="footer-total-hours" class="text-lg font-bold text-sky-400">0 ساعة</span>
+      </div>
+
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">مستحق الإضافي</span>
+        <span id="footer-total-overtime" class="text-lg font-bold text-emerald-400">0.00 ج.م</span>
+      </div>
+
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">عدد الشيفتات</span>
+        <span id="footer-shift-count" class="text-lg font-bold text-purple-400">0 شيفت</span>
+      </div>
+    </div>
+
+    <div id="adjustment-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+      <div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">التعويضات</span><strong id="summary-compensations" class="text-emerald-400">0.00 ج.م</strong></div>
+      <div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">الخصومات الإضافية</span><strong id="summary-other-deductions" class="text-rose-400">0.00 ج.م</strong></div>
+      <div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">أيام الغياب</span><strong id="summary-absence-days" class="text-amber-400">0 يوم</strong></div>
+      <div class="bg-slate-800 p-4 rounded-xl"><span class="text-xs text-slate-400 block">خصم الغياب من الأساسي</span><strong id="summary-absence-deduction" class="text-rose-400">0.00 ج.م</strong></div>
+    </div>
+
+    <div class="bg-gradient-to-r from-sky-900/60 via-slate-800 to-sky-900/60 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <div class="text-sm text-sky-200">الصافي النهائي المستحق</div>
+        <div class="text-xs text-slate-400">أساسي + KPI + إضافي + تعويضات − الخصومات − الغياب</div>
+      </div>
+      <div id="footer-final-total" class="text-3xl sm:text-4xl font-extrabold text-sky-300">6,500.00 ج.م</div>
+    </div>
+  </section>
 </main>
 
 <footer id="app-footer" class="hidden bg-slate-900 text-slate-400 py-6 text-center text-xs mt-8 border-t border-slate-800">
-<p>حاسبة المرتبات والشيفتات اليومية - OverShift</p>
-<p class="mt-2">جميع الحقوق محفوظة © 2026 | Yehia Ayman 🚀</p>
+  <p>حاسبة المرتبات والشيفتات اليومية - OverShift</p>
+  <p class="mt-2">جميع الحقوق محفوظة © 2026 | Yehia Ayman 🚀</p>
 </footer>
 
 <script>
-document.addEventListener("DOMContentLoaded",()=>{
-const SUPABASE_URL="https://rmhcmlujiacuydgmchih.supabase.co";
-const SUPABASE_ANON_KEY="sb_publishable_M5WAfXOvnYVbOiAQ1RLUkA_FnujlY9-";
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
-const $=id=>document.getElementById(id);
-let currentUser=null,baseSalary=6000,kpiBonus=500,shiftLogs=[],userAvatar=null,isDarkMode=true,cloudLoaded=false,saveTimer=null,realtimeChannel=null,egyptClockTimer=null,saveQueue=Promise.resolve();
+document.addEventListener("DOMContentLoaded", () => {
 
-function message(text,error=false){
-$("auth-message").textContent=text;
-$("auth-message").className="text-sm text-center mt-4 "+(error?"text-rose-300":"text-amber-300");
-}
-function showAuth(mode){
-$("login-form").classList.toggle("hidden",mode!=="login");
-$("signup-form").classList.toggle("hidden",mode!=="signup");
-$("show-login").className=mode==="login"?"py-2 rounded-lg bg-sky-600 text-white font-bold":"py-2 rounded-lg text-slate-300 font-bold";
-$("show-signup").className=mode==="signup"?"py-2 rounded-lg bg-sky-600 text-white font-bold":"py-2 rounded-lg text-slate-300 font-bold";
-message("");
-}
-function showDashboard(user){
-currentUser=user;
-$("auth-screen").classList.add("hidden");
-$("account-bar").classList.remove("hidden");
-$("app-header").classList.remove("hidden");
-$("app-main").classList.remove("hidden");
-$("app-footer").classList.remove("hidden");
-const accountName=user.user_metadata?.display_name||user.user_metadata?.username||user.username||user.email?.split("@")[0]||"حسابي";
-$("signed-in-name").textContent="أهلاً، "+accountName;
-}
-function hideDashboard(){
-currentUser=null;cloudLoaded=false;
-if(saveTimer){clearTimeout(saveTimer);saveTimer=null;}
-if(realtimeChannel){sb.removeChannel(realtimeChannel);realtimeChannel=null;}
-if(egyptClockTimer){clearInterval(egyptClockTimer);egyptClockTimer=null;}
-$("auth-screen").classList.remove("hidden");
-$("account-bar").classList.add("hidden");
-$("app-header").classList.add("hidden");
-$("app-main").classList.add("hidden");
-$("app-footer").classList.add("hidden");
-}
-async function accountGateway(payload){
-const {data,error}=await sb.functions.invoke("account-gateway",{body:payload});
-if(error){
-let serverMessage=data?.error||null;
-if(!serverMessage&&error.context?.json){try{const body=await error.context.json();serverMessage=body?.error||null;}catch(_){}}
-throw new Error(serverMessage||error.message||"تعذر الاتصال بخدمة الحسابات.");
-}
-if(!data||data.error)throw new Error(data?.error||"استجابة غير صحيحة من الخادم.");
-if(!data.session?.access_token||!data.session?.refresh_token)throw new Error("لم يتم إنشاء جلسة دخول. حاول مرة أخرى.");
-const {data:sessionData,error:sessionError}=await sb.auth.setSession({access_token:data.session.access_token,refresh_token:data.session.refresh_token});
-if(sessionError)throw sessionError;
-await startUserSession(sessionData.user||data.user);
-}
-$("show-login").addEventListener("click",()=>showAuth("login"));
-$("show-signup").addEventListener("click",()=>showAuth("signup"));
-$("login-form").addEventListener("submit",async e=>{
-e.preventDefault();
-const btn=$("login-form").querySelector('button[type="submit"]');
-btn.disabled=true;btn.textContent="جاري تسجيل الدخول...";
-try{await accountGateway({action:"login",username:$("login-username").value.trim().toLowerCase(),password:$("login-password").value});}
-catch(err){message(err.message||"فشل تسجيل الدخول.",true);}
-finally{btn.disabled=false;btn.textContent="دخول";}
-});
-$("signup-form").addEventListener("submit",async e=>{
-e.preventDefault();
-const btn=$("signup-form").querySelector('button[type="submit"]');
-btn.disabled=true;btn.textContent="جاري إنشاء الحساب...";
-try{await accountGateway({action:"signup",username:$("signup-username").value.trim().toLowerCase(),displayName:$("signup-name").value.trim(),password:$("signup-password").value,inviteCode:$("invite-code").value.trim()});}
-catch(err){message(err.message||"تعذر إنشاء الحساب.",true);}
-finally{btn.disabled=false;btn.textContent="إنشاء الحساب";}
-});
-$("logout-btn").addEventListener("click",async()=>{
-try{await sb.auth.signOut();}finally{hideDashboard();showAuth("login");}
-});
+  // إعدادات Supabase
+  const SUPABASE_URL = "https://rmhcmlujiacuydgmchih.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_M5WAfXOvnYVbOiAQ1RLUkA_FnujlY9-";
 
-async function startUserSession(user){
-if(!user)throw new Error("تعذر التعرف على الحساب.");
-showDashboard(user);
-try{await loadCloudState();}
-catch(err){hideDashboard();showAuth("login");throw err;}
-initDatePicker();updateEgyptTime();updateEntryPreview();renderSummaryAndTable();
-if(egyptClockTimer)clearInterval(egyptClockTimer);
-egyptClockTimer=setInterval(updateEgyptTime,1000);
-if(realtimeChannel)await sb.removeChannel(realtimeChannel);
-realtimeChannel=sb.channel("overshift-user-"+user.id).on("postgres_changes",{event:"*",schema:"public",table:"user_data",filter:"user_id=eq."+user.id},async payload=>{
-if(!currentUser||currentUser.id!==user.id||!payload.new)return;
-if(payload.new.updated_at&&Date.now()-new Date(payload.new.updated_at).getTime()<1500)return;
-try{await loadCloudState();}catch(err){console.warn("Cloud refresh failed:",err);}
-}).subscribe();
-$("auth-screen").classList.add("hidden");
-}
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-async function loadCloudState(){
-if(!currentUser)throw new Error("لا يوجد حساب مسجل.");
-const {data,error}=await sb.from("user_data").select("base_salary,kpi_bonus,shifts,avatar,theme").eq("user_id",currentUser.id).maybeSingle();
-if(error)throw error;
-if(data){
-baseSalary=Number(data.base_salary??6000);
-kpiBonus=Number(data.kpi_bonus??500);
-shiftLogs=Array.isArray(data.shifts)?data.shifts:[];
-userAvatar=data.avatar||null;
-isDarkMode=data.theme!=="light";
-}else{
-baseSalary=6000;kpiBonus=500;shiftLogs=[];userAvatar=null;isDarkMode=true;
-cloudLoaded=true;
-await saveCloudState(true);
-}
-cloudLoaded=true;
-$("base-salary-input").value=baseSalary;
-$("kpi-input").value=kpiBonus;
-$("work-days-input").value=26;
-$("shift-hours-input").value=8;
-applyTheme();applyAvatar(userAvatar);renderSummaryAndTable();updateEntryPreview();updateAdjustmentPreview();
-}
+  const $ = id => document.getElementById(id);
 
-async function saveCloudState(showStatus=false){
-if(!currentUser||!cloudLoaded)return;
-const payload={user_id:currentUser.id,base_salary:baseSalary,kpi_bonus:kpiBonus,shifts:shiftLogs,avatar:userAvatar,theme:isDarkMode?"dark":"light",updated_at:new Date().toISOString()};
-const {error}=await sb.from("user_data").upsert(payload,{onConflict:"user_id"});
-if(error){console.error("Cloud save failed:",error);if(showStatus)alert("لم يتم حفظ البيانات على السحابة: "+error.message);throw error;}
-if(showStatus)alert("تم حفظ بياناتك بنجاح على السحابة.");
-}
-function saveState(){
-if(!currentUser||!cloudLoaded)return;
-clearTimeout(saveTimer);
-saveTimer=setTimeout(()=>{
-saveQueue=saveQueue.then(()=>saveCloudState(false)).catch(err=>console.error("Save error:",err));
-},600);
-}
-function toggleDarkMode(){isDarkMode=!isDarkMode;applyTheme();saveState();}
-window.toggleDarkMode=toggleDarkMode;
-function applyTheme(){
-document.documentElement.classList.toggle("dark",isDarkMode);
-$("dark-mode-icon").className=isDarkMode?"fa-solid fa-sun":"fa-solid fa-moon";
-$("dark-mode-text").textContent=isDarkMode?"الوضع النهاري":"الوضع الليلي";
-}
+  let currentUser = null;
+  let baseSalary = 6000;
+  let kpiBonus = 500;
+  let shiftLogs = [];
+  let userAvatar = null;
+  let isDarkMode = true;
+  let cloudLoaded = false;
+  let saveTimer = null;
+  let realtimeChannel = null;
+  let egyptClockTimer = null;
+  let saveQueue = Promise.resolve();
 
-$("avatar-input").addEventListener("change",function(e){
-const file=e.target.files[0];if(!file)return;
-if(!file.type.startsWith("image/")){alert("من فضلك اختر صورة صحيحة.");e.target.value="";return;}
-if(file.size>700*1024){alert("حجم الصورة كبير. اختار صورة أقل من 700 كيلوبايت.");e.target.value="";return;}
-const reader=new FileReader();
-reader.onload=evt=>{userAvatar=evt.target.result;applyAvatar(userAvatar);saveState();};
-reader.readAsDataURL(file);
-});
-function applyAvatar(src){
-const container=$("header-avatar-container");
-if(src){container.innerHTML=`<img src="${src}" alt="Profile" class="w-full h-full object-cover">`;$("remove-avatar-btn").classList.remove("hidden");}
-else{container.innerHTML='<span class="text-sky-400 font-bold">YA</span>';$("remove-avatar-btn").classList.add("hidden");}
-}
-function removeAvatar(){userAvatar=null;$("avatar-input").value="";applyAvatar(null);saveState();}
-window.removeAvatar=removeAvatar;
+  function message(text, error = false) {
+    $("auth-message").textContent = text;
+    $("auth-message").className =
+      "text-sm text-center mt-4 " +
+      (error ? "text-rose-300" : "text-amber-300");
+  }
 
-function updateEgyptTime(){
-const now=new Date();
-$("egypt-time").textContent=new Intl.DateTimeFormat("ar-EG",{timeZone:"Africa/Cairo",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:true}).format(now);
-$("egypt-date").textContent=new Intl.DateTimeFormat("ar-EG",{timeZone:"Africa/Cairo",weekday:"long",year:"numeric",month:"long",day:"numeric"}).format(now);
-}
-function initDatePicker(){
-const now=new Date();
-const today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-$("entry-date").value=today;$("adjustment-date").value=today;
-}
-function calculateRates(){const dailyRate=baseSalary/26;const hourlyRate=dailyRate/8;return{dailyRate,hourlyRate};}
-function updateEntryPreview(){
-const {hourlyRate}=calculateRates();
-const hours=parseFloat($("overtime-hours").value)||0;
-const multiplier=parseFloat($("overtime-rate").value)||1.5;
-$("entry-preview-amount").textContent=(hours*hourlyRate*multiplier).toFixed(2)+" ج.م";
-}
+  function showAuth(mode) {
+    $("login-form").classList.toggle("hidden", mode !== "login");
+    $("signup-form").classList.toggle("hidden", mode !== "signup");
 
-function renderSummaryAndTable(){
-const {dailyRate,hourlyRate}=calculateRates();
-const normalShifts=shiftLogs.filter(item=>!item.kind||item.kind==="shift");
-const compensationEntries=shiftLogs.filter(item=>item.kind==="compensation");
-const deductionEntries=shiftLogs.filter(item=>item.kind==="deduction");
-const absenceEntries=shiftLogs.filter(item=>item.kind==="absence");
-let totalPay=0,totalHours=0;
-normalShifts.forEach(item=>{totalPay+=Number(item.hours||0)*hourlyRate*Number(item.multiplier||1.5);totalHours+=Number(item.hours||0);});
-const totalCompensation=compensationEntries.reduce((sum,item)=>sum+Number(item.amount||0),0);
-const totalOtherDeductions=deductionEntries.reduce((sum,item)=>sum+Number(item.amount||0),0);
-const totalAbsenceDays=absenceEntries.reduce((sum,item)=>sum+Number(item.days||0),0);
-const absenceDeduction=totalAbsenceDays*dailyRate;
-const net=baseSalary+kpiBonus+totalPay+totalCompensation-totalOtherDeductions-absenceDeduction;
+    $("show-login").className =
+      mode === "login"
+        ? "py-2 rounded-lg bg-sky-600 text-white font-bold"
+        : "py-2 rounded-lg text-slate-300 font-bold";
 
-$("card-base-salary").textContent=baseSalary.toLocaleString("en-US")+" ج.م";
-$("card-daily-rate").textContent=dailyRate.toFixed(2);
-$("card-hourly-rate").textContent=hourlyRate.toFixed(2)+" ج.م";
-$("card-kpi-bonus").textContent=kpiBonus.toFixed(2)+" ج.م";
-$("card-total-overtime-pay").textContent=totalPay.toFixed(2)+" ج.م";
-$("card-total-overtime-hours").textContent=totalHours+" ساعة";
-$("card-net-salary").textContent=net.toFixed(2)+" ج.م";
-$("footer-base-salary").textContent=baseSalary.toFixed(2)+" ج.م";
-$("footer-kpi-bonus").textContent=kpiBonus.toFixed(2)+" ج.م";
-$("footer-total-hours").textContent=totalHours+" ساعة";
-$("footer-total-overtime").textContent=totalPay.toFixed(2)+" ج.م";
-$("footer-shift-count").textContent=normalShifts.length+" شيفت";
-$("footer-final-total").textContent=net.toFixed(2)+" ج.م";
-const details=$("adjustment-summary");
-if(details){
-$("summary-compensations").textContent=totalCompensation.toFixed(2)+" ج.م";
-$("summary-other-deductions").textContent=totalOtherDeductions.toFixed(2)+" ج.م";
-$("summary-absence-days").textContent=totalAbsenceDays.toFixed(1)+" يوم";
-$("summary-absence-deduction").textContent=absenceDeduction.toFixed(2)+" ج.م";
-}
-const tbody=$("shifts-tbody"),empty=$("empty-state");
-tbody.innerHTML="";
-if(!shiftLogs.length){empty.classList.remove("hidden");return;}
-empty.classList.add("hidden");
-[...shiftLogs].sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(item=>{
-let label,hoursText,multiplierText,amountText,amountClass="text-emerald-500 font-bold";
-if(item.kind==="absence"){
-const amount=Number(item.days||0)*dailyRate;
-label="خصم غياب";hoursText=Number(item.days||0)+" يوم";multiplierText="26 يوم عمل";amountText="-"+amount.toFixed(2)+" ج.م";amountClass="text-rose-500 font-bold";
-}else if(item.kind==="compensation"){
-label="تعويض / إضافة";hoursText="—";multiplierText="—";amountText="+"+Number(item.amount||0).toFixed(2)+" ج.م";
-}else if(item.kind==="deduction"){
-label="خصم إضافي";hoursText="—";multiplierText="—";amountText="-"+Number(item.amount||0).toFixed(2)+" ج.م";amountClass="text-rose-500 font-bold";
-}else{
-label=item.type==="Morning"?"☀️ صباحي":item.type==="Night"?"🌙 مسائي":"🌌 أوفر نايت";
-hoursText=Number(item.hours||0)+" ساعة";multiplierText=Number(item.multiplier)===1.5?"1.5x":"2.0x";
-amountText=(Number(item.hours||0)*hourlyRate*Number(item.multiplier||1.5)).toFixed(2)+" ج.م";
-}
-const tr=document.createElement("tr");tr.className="hover:bg-slate-800/50";
-[item.date||"—",label,hoursText,multiplierText,amountText].forEach((value,index)=>{
-const td=document.createElement("td");td.className="p-3";if(index===4)td.classList.add(...amountClass.split(" "));td.textContent=value;tr.appendChild(td);
-});
-const action=document.createElement("td");action.className="p-3 text-center";
-const btn=document.createElement("button");btn.className="text-rose-500 p-2";btn.innerHTML='<i class="fa-solid fa-trash-can"></i>';btn.title="حذف";
-btn.addEventListener("click",()=>deleteShiftEntry(item.id));action.appendChild(btn);tr.appendChild(action);tbody.appendChild(tr);
-});
-}
+    $("show-signup").className =
+      mode === "signup"
+        ? "py-2 rounded-lg bg-sky-600 text-white font-bold"
+        : "py-2 rounded-lg text-slate-300 font-bold";
 
-$("base-salary-input").addEventListener("input",e=>{
-baseSalary=Math.max(0,parseFloat(e.target.value)||0);saveState();renderSummaryAndTable();updateEntryPreview();updateAdjustmentPreview();
-});
-$("kpi-input").addEventListener("input",e=>{kpiBonus=Math.max(0,parseFloat(e.target.value)||0);saveState();renderSummaryAndTable();});
-$("overtime-hours").addEventListener("input",updateEntryPreview);
-$("overtime-rate").addEventListener("change",updateEntryPreview);
+    message("");
+  }
 
-$("shift-form").addEventListener("submit",e=>{
-e.preventDefault();
-const hours=parseFloat($("overtime-hours").value)||0;
-if(hours<=0){alert("أدخل عدد ساعات صحيح.");return;}
-if(!$("entry-date").value){alert("اختر تاريخ الشيفت.");return;}
-shiftLogs.push({id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(),date:$("entry-date").value,type:$("shift-type").value,hours:hours,multiplier:parseFloat($("overtime-rate").value)||1.5});
-saveState();renderSummaryAndTable();$("overtime-hours").value="1";updateEntryPreview();
-});
+  function showDashboard(user) {
+    currentUser = user;
 
-function updateAdjustmentPreview(){
-const kind=$("adjustment-kind").value;
-const amountFields=$("adjustment-amount-fields"),absenceFields=$("absence-fields");
-const amountInput=$("adjustment-amount"),daysInput=$("absence-days");
-const {dailyRate}=calculateRates();
-absenceFields.classList.toggle("hidden",kind!=="absence");
-amountFields.classList.toggle("hidden",kind==="absence");
-amountInput.required=kind!=="absence";daysInput.required=kind==="absence";
-if(kind==="absence"){
-const days=Math.max(0,Number(daysInput.value)||0);
-$("adjustment-preview-label").textContent="قيمة خصم الغياب من الأساسي:";
-$("adjustment-preview").textContent=(days*dailyRate).toFixed(2)+" ج.م";
-}else{
-const amount=Math.max(0,Number(amountInput.value)||0);
-$("adjustment-preview-label").textContent=kind==="compensation"?"قيمة التعويض المضافة:":"قيمة الخصم الإضافي:";
-$("adjustment-preview").textContent=amount.toFixed(2)+" ج.م";
-$("adjustment-amount-label").textContent=kind==="compensation"?"قيمة التعويض بالجنيه":"قيمة الخصم بالجنيه";
-}
-}
-$("adjustment-kind").addEventListener("change",updateAdjustmentPreview);
-$("adjustment-amount").addEventListener("input",updateAdjustmentPreview);
-$("absence-days").addEventListener("input",updateAdjustmentPreview);
+    $("auth-screen").classList.add("hidden");
+    $("account-bar").classList.remove("hidden");
+    $("app-header").classList.remove("hidden");
+    $("app-main").classList.remove("hidden");
+    $("app-footer").classList.remove("hidden");
 
-$("adjustment-form").addEventListener("submit",e=>{
-e.preventDefault();
-const kind=$("adjustment-kind").value,date=$("adjustment-date").value;
-if(!date)return alert("اختر تاريخ الحركة.");
-const record={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(),kind,date};
-if(kind==="absence"){
-const days=Number($("absence-days").value);
-if(!Number.isFinite(days)||days<=0||days>26||Math.round(days*2)!==days*2)return alert("أدخل عدد أيام غياب صحيحاً، بحد أقصى 26 يوماً وبفواصل نصف يوم.");
-record.days=days;
-}else{
-const amount=Number($("adjustment-amount").value);
-if(!Number.isFinite(amount)||amount<=0)return alert("أدخل مبلغاً صحيحاً أكبر من صفر.");
-record.amount=amount;
-}
-shiftLogs.push(record);saveState();renderSummaryAndTable();
-if(kind==="absence")$("absence-days").value="1";else $("adjustment-amount").value="";
-updateAdjustmentPreview();
-});
+    const accountName =
+      user.user_metadata?.display_name ||
+      user.user_metadata?.username ||
+      user.username ||
+      user.email?.split("@")[0] ||
+      "حسابي";
 
-function deleteShiftEntry(id){shiftLogs=shiftLogs.filter(item=>item.id!==id);saveState();renderSummaryAndTable();}
-$("clear-all-btn").addEventListener("click",()=>{
-if(!shiftLogs.length)return;
-if(!confirm("متأكد إنك عايز تمسح كل السجل، بما فيه الشيفتات والتعويضات والخصومات والغياب؟"))return;
-shiftLogs=[];saveState();renderSummaryAndTable();
-});
+    $("signed-in-name").textContent = "أهلاً، " + accountName;
+  }
 
-async function initializeApp(){
-try{
-const {data,error}=await sb.auth.getSession();
-if(error)throw error;
-if(data.session?.user){
-try{await startUserSession(data.session.user);}
-catch(err){console.error(err);hideDashboard();showAuth("login");message("تعذر تحميل بياناتك: "+err.message,true);}
-}else{hideDashboard();showAuth("login");}
-}catch(err){console.error("Initialization error:",err);hideDashboard();showAuth("login");message("تعذر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.",true);}
-}
-sb.auth.onAuthStateChange((event,session)=>{
-if(event==="SIGNED_OUT"||!session){hideDashboard();showAuth("login");}
-});
-updateAdjustmentPreview();
-initializeApp();
+  function hideDashboard() {
+    currentUser = null;
+    cloudLoaded = false;
+
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
+    }
+
+    if (realtimeChannel) {
+      sb.removeChannel(realtimeChannel);
+      realtimeChannel = null;
+    }
+
+    if (egyptClockTimer) {
+      clearInterval(egyptClockTimer);
+      egyptClockTimer = null;
+    }
+
+    $("auth-screen").classList.remove("hidden");
+    $("account-bar").classList.add("hidden");
+    $("app-header").classList.add("hidden");
+    $("app-main").classList.add("hidden");
+    $("app-footer").classList.add("hidden");
+  }
+
+  async function accountGateway(payload) {
+    const { data, error } = await sb.functions.invoke("account-gateway", {
+      body: payload
+    });
+
+    if (error) {
+      let serverMessage = data?.error || null;
+
+      if (!serverMessage && error.context?.json) {
+        try {
+          const body = await error.context.json();
+          serverMessage = body?.error || null;
+        } catch (_) {}
+      }
+
+      throw new Error(serverMessage || error.message || "تعذر الاتصال بخدمة الحسابات.");
+    }
+
+    if (!data || data.error) {
+      throw new Error(data?.error || "استجابة غير صحيحة من الخادم.");
+    }
+
+    if (!data.session?.access_token || !data.session?.refresh_token) {
+      throw new Error("لم يتم إنشاء جلسة دخول. حاول مرة أخرى.");
+    }
+
+    const { data: sessionData, error: sessionError } =
+      await sb.auth.setSession({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token
+      });
+
+    if (sessionError) throw sessionError;
+
+    await startUserSession(sessionData.user || data.user);
+  }
+
+  $("show-login").addEventListener("click", () => showAuth("login"));
+  $("show-signup").addEventListener("click", () => showAuth("signup"));
+
+  $("login-form").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const btn = $("login-form").querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = "جاري تسجيل الدخول...";
+
+    try {
+      await accountGateway({
+        action: "login",
+        username: $("login-username").value.trim().toLowerCase(),
+        password: $("login-password").value
+      });
+    } catch (err) {
+      message(err.message || "فشل تسجيل الدخول.", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "دخول";
+    }
+  });
+
+  $("signup-form").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const btn = $("signup-form").querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = "جاري إنشاء الحساب...";
+
+    try {
+      await accountGateway({
+        action: "signup",
+        username: $("signup-username").value.trim().toLowerCase(),
+        displayName: $("signup-name").value.trim(),
+        password: $("signup-password").value,
+        inviteCode: $("invite-code").value.trim()
+      });
+    } catch (err) {
+      message(err.message || "تعذر إنشاء الحساب.", true);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "إنشاء الحساب";
+    }
+  });
+
+  $("logout-btn").addEventListener("click", async () => {
+    try {
+      await sb.auth.signOut();
+    } finally {
+      hideDashboard();
+      showAuth("login");
+    }
+  });
+
+  async function startUserSession(user) {
+    if (!user) throw new Error("تعذر التعرف على الحساب.");
+
+    showDashboard(user);
+
+    try {
+      await loadCloudState();
+    } catch (err) {
+      hideDashboard();
+      showAuth("login");
+      throw err;
+    }
+
+    initDatePicker();
+    updateEgyptTime();
+    updateEntryPreview();
+    renderSummaryAndTable();
+
+    if (egyptClockTimer) clearInterval(egyptClockTimer);
+    egyptClockTimer = setInterval(updateEgyptTime, 1000);
+
+    if (realtimeChannel) {
+      await sb.removeChannel(realtimeChannel);
+    }
+
+    realtimeChannel = sb
+      .channel("overshift-user-" + user.id)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "user_data",
+          filter: "user_id=eq." + user.id
+        },
+        async payload => {
+          if (!currentUser || currentUser.id !== user.id || !payload.new) return;
+          if (payload.new.updated_at && Date.now() - new Date(payload.new.updated_at).getTime() < 1500) return;
+
+          try {
+            await loadCloudState();
+          } catch (err) {
+            console.warn("Cloud refresh failed:", err);
+          }
+        }
+      )
+      .subscribe();
+
+    $("auth-screen").classList.add("hidden");
+  }
+
+  async function loadCloudState() {
+    if (!currentUser) throw new Error("لا يوجد حساب مسجل.");
+
+    const { data, error } = await sb
+      .from("user_data")
+      .select("base_salary,kpi_bonus,shifts,avatar,theme")
+      .eq("user_id", currentUser.id)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (data) {
+      baseSalary = Number(data.base_salary ?? 6000);
+      kpiBonus = Number(data.kpi_bonus ?? 500);
+      shiftLogs = Array.isArray(data.shifts) ? data.shifts : [];
+      userAvatar = data.avatar || null;
+      isDarkMode = data.theme !== "light";
+    } else {
+      // حساب جديد: يبدأ ببيانات مستقلة تماماً.
+      baseSalary = 6000;
+      kpiBonus = 500;
+      shiftLogs = [];
+      userAvatar = null;
+      isDarkMode = true;
+
+      cloudLoaded = true;
+      await saveCloudState(true);
+    }
+
+    cloudLoaded = true;
+
+    $("base-salary-input").value = baseSalary;
+    $("kpi-input").value = kpiBonus;
+    $("work-days-input").value = 26;
+    $("shift-hours-input").value = 8;
+
+    applyTheme();
+    applyAvatar(userAvatar);
+    renderSummaryAndTable();
+    updateEntryPreview();
+    updateAdjustmentPreview();
+  }
+
+  async function saveCloudState(showStatus = false) {
+    if (!currentUser || !cloudLoaded) return;
+
+    const userId = currentUser.id;
+
+    const payload = {
+      user_id: userId,
+      base_salary: baseSalary,
+      kpi_bonus: kpiBonus,
+      shifts: shiftLogs,
+      avatar: userAvatar,
+      theme: isDarkMode ? "dark" : "light",
+      updated_at: new Date().toISOString()
+    };
+
+    const { error } = await sb
+      .from("user_data")
+      .upsert(payload, { onConflict: "user_id" });
+
+    if (error) {
+      console.error("Cloud save failed:", error);
+
+      if (showStatus) {
+        alert("لم يتم حفظ البيانات على السحابة: " + error.message);
+      }
+
+      throw error;
+    }
+
+    if (showStatus) {
+      alert("تم حفظ بياناتك بنجاح على السحابة.");
+    }
+  }
+
+  function saveState() {
+    if (!currentUser || !cloudLoaded) return;
+
+    clearTimeout(saveTimer);
+
+    saveTimer = setTimeout(() => {
+      saveQueue = saveQueue
+        .then(() => saveCloudState(false))
+        .catch(err => console.error("Save error:", err));
+    }, 600);
+  }
+
+  function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    applyTheme();
+    saveState();
+  }
+
+  window.toggleDarkMode = toggleDarkMode;
+
+  function applyTheme() {
+    document.documentElement.classList.toggle("dark", isDarkMode);
+
+    $("dark-mode-icon").className = isDarkMode
+      ? "fa-solid fa-sun"
+      : "fa-solid fa-moon";
+
+    $("dark-mode-text").textContent = isDarkMode
+      ? "الوضع النهاري"
+      : "الوضع الليلي";
+  }
+
+  $("avatar-input").addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      alert("من فضلك اختر صورة صحيحة.");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 700 * 1024) {
+      alert("حجم الصورة كبير. اختار صورة أقل من 700 كيلوبايت.");
+      e.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = evt => {
+      userAvatar = evt.target.result;
+      applyAvatar(userAvatar);
+      saveState();
+    };
+
+    reader.readAsDataURL(file);
+  });
+
+  function applyAvatar(src) {
+    const container = $("header-avatar-container");
+
+    if (src) {
+      container.innerHTML =
+        `<img src="${src}" alt="Profile" class="w-full h-full object-cover">`;
+
+      $("remove-avatar-btn").classList.remove("hidden");
+    } else {
+      container.innerHTML =
+        '<span class="text-sky-400 font-bold">YA</span>';
+
+      $("remove-avatar-btn").classList.add("hidden");
+    }
+  }
+
+  function removeAvatar() {
+    userAvatar = null;
+    $("avatar-input").value = "";
+    applyAvatar(null);
+    saveState();
+  }
+
+  window.removeAvatar = removeAvatar;
+
+  function updateEgyptTime() {
+    const now = new Date();
+
+    $("egypt-time").textContent =
+      new Intl.DateTimeFormat("ar-EG", {
+        timeZone: "Africa/Cairo",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      }).format(now);
+
+    $("egypt-date").textContent =
+      new Intl.DateTimeFormat("ar-EG", {
+        timeZone: "Africa/Cairo",
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }).format(now);
+  }
+
+  function initDatePicker() {
+    const now = new Date();
+
+    const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+    $("entry-date").value = today;
+    $("adjustment-date").value = today;
+  }
+
+  function calculateRates() {
+    const dailyRate = baseSalary / 26;
+    const hourlyRate = dailyRate / 8;
+
+    return { dailyRate, hourlyRate };
+  }
+
+  function updateEntryPreview() {
+    const { hourlyRate } = calculateRates();
+
+    const hours = parseFloat($("overtime-hours").value) || 0;
+    const multiplier = parseFloat($("overtime-rate").value) || 1.5;
+
+    $("entry-preview-amount").textContent =
+      (hours * hourlyRate * multiplier).toFixed(2) + " ج.م";
+  }
+
+  function renderSummaryAndTable() {
+    const { dailyRate, hourlyRate } = calculateRates();
+    const normalShifts = shiftLogs.filter(item => !item.kind || item.kind === "shift");
+    const compensationEntries = shiftLogs.filter(item => item.kind === "compensation");
+    const deductionEntries = shiftLogs.filter(item => item.kind === "deduction");
+    const absenceEntries = shiftLogs.filter(item => item.kind === "absence");
+
+    let totalPay = 0;
+    let totalHours = 0;
+    normalShifts.forEach(item => {
+      totalPay += Number(item.hours || 0) * hourlyRate * Number(item.multiplier || 1.5);
+      totalHours += Number(item.hours || 0);
+    });
+
+    const totalCompensation = compensationEntries.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalOtherDeductions = deductionEntries.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalAbsenceDays = absenceEntries.reduce((sum, item) => sum + Number(item.days || 0), 0);
+    const absenceDeduction = totalAbsenceDays * dailyRate;
+    const net = baseSalary + kpiBonus + totalPay + totalCompensation - totalOtherDeductions - absenceDeduction;
+
+    $("card-base-salary").textContent = baseSalary.toLocaleString("en-US") + " ج.م";
+    $("card-daily-rate").textContent = dailyRate.toFixed(2);
+    $("card-hourly-rate").textContent = hourlyRate.toFixed(2) + " ج.م";
+    $("card-kpi-bonus").textContent = kpiBonus.toFixed(2) + " ج.م";
+    $("card-total-overtime-pay").textContent = totalPay.toFixed(2) + " ج.م";
+    $("card-total-overtime-hours").textContent = totalHours + " ساعة";
+    $("card-net-salary").textContent = net.toFixed(2) + " ج.م";
+
+    $("footer-base-salary").textContent = baseSalary.toFixed(2) + " ج.م";
+    $("footer-kpi-bonus").textContent = kpiBonus.toFixed(2) + " ج.م";
+    $("footer-total-hours").textContent = totalHours + " ساعة";
+    $("footer-total-overtime").textContent = totalPay.toFixed(2) + " ج.م";
+    $("footer-shift-count").textContent = normalShifts.length + " شيفت";
+    $("footer-final-total").textContent = net.toFixed(2) + " ج.م";
+
+    // تفاصيل الخصومات والتعويضات في ملخص الإجمالي
+    const details = $("adjustment-summary");
+    if (details) {
+      $("summary-compensations").textContent = totalCompensation.toFixed(2) + " ج.م";
+      $("summary-other-deductions").textContent = totalOtherDeductions.toFixed(2) + " ج.م";
+      $("summary-absence-days").textContent = totalAbsenceDays.toFixed(1) + " يوم";
+      $("summary-absence-deduction").textContent = absenceDeduction.toFixed(2) + " ج.م";
+    }
+
+    const tbody = $("shifts-tbody");
+    const empty = $("empty-state");
+    tbody.innerHTML = "";
+
+    if (!shiftLogs.length) {
+      empty.classList.remove("hidden");
+      return;
+    }
+    empty.classList.add("hidden");
+
+    [...shiftLogs].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(item => {
+      let label, hoursText, multiplierText, amountText, amountClass = "text-emerald-500 font-bold";
+      if (item.kind === "absence") {
+        const amount = Number(item.days || 0) * dailyRate;
+        label = item.reason ? "خصم غياب - " + item.reason : "خصم غياب";
+        hoursText = Number(item.days || 0) + " يوم";
+        multiplierText = "26 يوم عمل";
+        amountText = "-" + amount.toFixed(2) + " ج.م";
+        amountClass = "text-rose-500 font-bold";
+      } else if (item.kind === "compensation") {
+        label = "تعويض / إضافة";
+        hoursText = "—";
+        multiplierText = "—";
+        amountText = "+" + Number(item.amount || 0).toFixed(2) + " ج.م";
+      } else if (item.kind === "deduction") {
+        label = "خصم إضافي";
+        hoursText = "—";
+        multiplierText = "—";
+        amountText = "-" + Number(item.amount || 0).toFixed(2) + " ج.م";
+        amountClass = "text-rose-500 font-bold";
+      } else {
+        label = item.type === "Morning" ? "☀️ صباحي" : item.type === "Night" ? "🌙 مسائي" : "🌌 أوفر نايت";
+        hoursText = Number(item.hours || 0) + " ساعة";
+        multiplierText = Number(item.multiplier) === 1.5 ? "1.5x" : "2.0x";
+        amountText = (Number(item.hours || 0) * hourlyRate * Number(item.multiplier || 1.5)).toFixed(2) + " ج.م";
+      }
+
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-800/50";
+      [item.date || "—", label, hoursText, multiplierText, amountText].forEach((value, index) => {
+        const td = document.createElement("td");
+        td.className = "p-3";
+        if (index === 4) td.classList.add(...amountClass.split(" "));
+        td.textContent = value;
+        tr.appendChild(td);
+      });
+      const action = document.createElement("td");
+      action.className = "p-3 text-center";
+      const btn = document.createElement("button");
+      btn.className = "text-rose-500 p-2";
+      btn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+      btn.title = "حذف";
+      btn.addEventListener("click", () => deleteShiftEntry(item.id));
+      action.appendChild(btn);
+      tr.appendChild(action);
+      tbody.appendChild(tr);
+    });
+  }
+
+  $("base-salary-input").addEventListener("input", e => {
+    baseSalary = Math.max(0, parseFloat(e.target.value) || 0);
+    saveState();
+    renderSummaryAndTable();
+    updateEntryPreview();
+    updateAdjustmentPreview();
+  });
+
+  $("kpi-input").addEventListener("input", e => {
+    kpiBonus = Math.max(0, parseFloat(e.target.value) || 0);
+    saveState();
+    renderSummaryAndTable();
+  });
+
+  $("overtime-hours").addEventListener("input", updateEntryPreview);
+  $("overtime-rate").addEventListener("change", updateEntryPreview);
+
+  $("shift-form").addEventListener("submit", e => {
+    e.preventDefault();
+
+    const hours = parseFloat($("overtime-hours").value) || 0;
+
+    if (hours <= 0) {
+      alert("أدخل عدد ساعات صحيح.");
+      return;
+    }
+
+    if (!$("entry-date").value) {
+      alert("اختر تاريخ الشيفت.");
+      return;
+    }
+
+    shiftLogs.push({
+      id: crypto.randomUUID
+        ? crypto.randomUUID()
+        : Date.now().toString(),
+
+      date: $("entry-date").value,
+      type: $("shift-type").value,
+      hours: hours,
+      multiplier: parseFloat($("overtime-rate").value) || 1.5
+    });
+
+    saveState();
+    renderSummaryAndTable();
+
+    $("overtime-hours").value = "1";
+    updateEntryPreview();
+  });
+
+  function updateAdjustmentPreview() {
+    const kind = $("adjustment-kind").value;
+    const amountFields = $("adjustment-amount-fields");
+    const absenceFields = $("absence-fields");
+    const amountInput = $("adjustment-amount");
+    const daysInput = $("absence-days");
+    const reasonInput = $("absence-reason");
+    const { dailyRate } = calculateRates();
+
+    absenceFields.classList.toggle("hidden", kind !== "absence");
+    amountFields.classList.toggle("hidden", kind === "absence");
+    amountInput.required = kind !== "absence";
+    daysInput.required = kind === "absence";
+    reasonInput.required = kind === "absence";
+
+    if (kind === "absence") {
+      const days = Math.max(0, Number(daysInput.value) || 0);
+      $("adjustment-preview-label").textContent = "قيمة خصم الغياب من الأساسي:";
+      $("adjustment-preview").textContent = (days * dailyRate).toFixed(2) + " ج.م";
+    } else {
+      const amount = Math.max(0, Number(amountInput.value) || 0);
+      $("adjustment-preview-label").textContent = kind === "compensation" ? "قيمة التعويض المضافة:" : "قيمة الخصم الإضافي:";
+      $("adjustment-preview").textContent = amount.toFixed(2) + " ج.م";
+      $("adjustment-amount-label").textContent = kind === "compensation" ? "قيمة التعويض بالجنيه" : "قيمة الخصم بالجنيه";
+    }
+  }
+
+  $("adjustment-kind").addEventListener("change", updateAdjustmentPreview);
+  $("adjustment-amount").addEventListener("input", updateAdjustmentPreview);
+  $("absence-days").addEventListener("change", updateAdjustmentPreview);
+
+  $("adjustment-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const kind = $("adjustment-kind").value;
+    const date = $("adjustment-date").value;
+    if (!date) return alert("اختر تاريخ الحركة.");
+
+    const record = {
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+      kind,
+      date
+    };
+
+    if (kind === "absence") {
+      const days = Number($("absence-days").value);
+      if (!Number.isFinite(days) || days <= 0 || days > 26 || Math.round(days * 2) !== days * 2) {
+        return alert("أدخل عدد أيام غياب صحيحاً، بحد أقصى 26 يوماً وبفواصل نصف يوم.");
+      }
+      record.days = days;
+      const reason = $("absence-reason").value.trim();
+      if (!reason) return alert("اكتب سبب الخصم قبل التسجيل.");
+      record.reason = reason;
+    } else {
+      const amount = Number($("adjustment-amount").value);
+      if (!Number.isFinite(amount) || amount <= 0) return alert("أدخل مبلغاً صحيحاً أكبر من صفر.");
+      record.amount = amount;
+    }
+
+    shiftLogs.push(record);
+    saveState();
+    renderSummaryAndTable();
+    if (kind === "absence") {
+      $("absence-days").value = "1";
+      $("absence-reason").value = "";
+    } else $("adjustment-amount").value = "";
+    updateAdjustmentPreview();
+  });
+
+  function deleteShiftEntry(id) {
+    shiftLogs = shiftLogs.filter(item => item.id !== id);
+    saveState();
+    renderSummaryAndTable();
+  }
+
+  $("clear-all-btn").addEventListener("click", () => {
+    if (!shiftLogs.length) return;
+
+    if (!confirm("متأكد إنك عايز تمسح كل السجل، بما فيه الشيفتات والتعويضات والخصومات والغياب؟")) return;
+
+    shiftLogs = [];
+    saveState();
+    renderSummaryAndTable();
+  });
+
+  // فحص جلسة الدخول عند فتح الموقع
+  async function initializeApp() {
+    try {
+      const { data, error } = await sb.auth.getSession();
+
+      if (error) throw error;
+
+      if (data.session?.user) {
+        try {
+          await startUserSession(data.session.user);
+        } catch (err) {
+          console.error(err);
+          hideDashboard();
+          showAuth("login");
+          message("تعذر تحميل بياناتك: " + err.message, true);
+        }
+      } else {
+        hideDashboard();
+        showAuth("login");
+      }
+
+    } catch (err) {
+      console.error("Initialization error:", err);
+      hideDashboard();
+      showAuth("login");
+      message("تعذر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.", true);
+    }
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT" || !session) {
+      hideDashboard();
+      showAuth("login");
+    }
+  });
+
+  updateAdjustmentPreview();
+  initializeApp();
+
 });
 </script>
-
+<!-- WELCOME SCREEN ADD-ON -->
 <style>
-#welcome-overlay{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at center,#172554,#020617);display:none;align-items:center;justify-content:center;text-align:center;font-family:'Cairo',sans-serif;padding:20px}
-#welcome-overlay.active{display:flex}
-#welcome-overlay .welcome-content{animation:welcomeFade 1s ease}
-#welcome-overlay .welcome-avatar{width:125px;height:125px;border-radius:50%;border:4px solid #38bdf8;object-fit:cover;margin:25px auto;box-shadow:0 0 35px #0284c755}
-#welcome-overlay .welcome-title{color:white;font-size:34px;font-weight:900}
-#welcome-overlay .welcome-name{color:#38bdf8;font-size:23px;font-weight:800;margin-top:12px}
-#welcome-overlay .welcome-subtitle{color:#94a3b8;margin-top:12px;font-size:14px}
-@keyframes welcomeFade{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-</style>
-<div id="welcome-overlay">
-<div class="welcome-content">
-<div class="welcome-title">WELCOME BACK</div>
-<img id="welcome-photo" class="welcome-avatar" alt="Profile">
-<div id="welcome-user" class="welcome-name">Welcome!</div>
-<div class="welcome-subtitle">سعيد بعودتك إلى Over Shift ⚡</div>
-<div style="color:#38bdf8;margin-top:25px;font-size:13px">Preparing your dashboard...</div>
-</div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded",function(){
-const overlay=document.getElementById("welcome-overlay"),auth=document.getElementById("auth-screen");
-let welcomeTimer=null,wasLoggedIn=false;
-const observer=new MutationObserver(function(){
-if(!auth)return;
-const loggedIn=auth.classList.contains("hidden");
-if(loggedIn&&!wasLoggedIn){
-wasLoggedIn=true;clearTimeout(welcomeTimer);
-const name=document.getElementById("signed-in-name"),avatar=document.getElementById("header-avatar-container");
-document.getElementById("welcome-user").textContent=name?name.textContent.replace("أهلاً،","").trim():"Welcome!";
-const image=avatar?avatar.querySelector("img"):null;
-document.getElementById("welcome-photo").src=image?image.src:"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="125" height="125"><rect width="100%" height="100%" fill="#1e293b"/><text x="50%" y="58%" text-anchor="middle" font-size="38" fill="#38bdf8">YA</text></svg>');
-overlay.classList.add("active");
-document.getElementById("account-bar").classList.add("hidden");
-document.getElementById("app-header").classList.add("hidden");
-document.getElementById("app-main").classList.add("hidden");
-document.getElementById("app-footer").classList.add("hidden");
-welcomeTimer=setTimeout(function(){
-overlay.classList.remove("active");
-document.getElementById("account-bar").classList.remove("hidden");
-document.getElementById("app-header").classList.remove("hidden");
-document.getElementById("app-main").classList.remove("hidden");
-document.getElementById("app-footer").classList.remove("hidden");
-},2000);
+#welcome-overlay {
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:radial-gradient(circle at center,#172554,#020617);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-family:'Cairo',sans-serif;
+  padding:20px;
 }
-if(!loggedIn){wasLoggedIn=false;clearTimeout(welcomeTimer);overlay.classList.remove("active");}
+#welcome-overlay.active {
+  display:flex;
+}
+#welcome-overlay .welcome-content {
+  animation:welcomeFade 1s ease;
+}
+#welcome-overlay .welcome-avatar {
+  width:125px;
+  height:125px;
+  border-radius:50%;
+  border:4px solid #38bdf8;
+  object-fit:cover;
+  margin:25px auto;
+  box-shadow:0 0 35px #0284c755;
+}
+#welcome-overlay .welcome-title {
+  color:white;
+  font-size:34px;
+  font-weight:900;
+}
+#welcome-overlay .welcome-name {
+  color:#38bdf8;
+  font-size:23px;
+  font-weight:800;
+  margin-top:12px;
+}
+#welcome-overlay .welcome-subtitle {
+  color:#94a3b8;
+  margin-top:12px;
+  font-size:14px;
+}
+@keyframes welcomeFade {
+  from {opacity:0;transform:translateY(20px)}
+  to {opacity:1;transform:translateY(0)}
+}
+</style>
+
+<div id="welcome-overlay">
+  <div class="welcome-content">
+    <div class="welcome-title">WELCOME BACK</div>
+    <img id="welcome-photo"
+      class="welcome-avatar"
+      alt="Profile">
+    <div id="welcome-user" class="welcome-name">
+      Welcome!
+    </div>
+    <div class="welcome-subtitle">
+      سعيد بعودتك إلى Over Shift ⚡
+    </div>
+    <div style="color:#38bdf8;margin-top:25px;font-size:13px">
+      Preparing your dashboard...
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+
+  const overlay = document.getElementById("welcome-overlay");
+  const auth = document.getElementById("auth-screen");
+
+  let welcomeTimer = null;
+  let wasLoggedIn = false;
+
+  const observer = new MutationObserver(function() {
+
+    if (!auth) return;
+
+    const loggedIn = auth.classList.contains("hidden");
+
+    if (loggedIn && !wasLoggedIn) {
+
+      wasLoggedIn = true;
+
+      clearTimeout(welcomeTimer);
+
+      const name = document.getElementById("signed-in-name");
+      const avatar = document.getElementById("header-avatar-container");
+
+      document.getElementById("welcome-user").textContent =
+        name ? name.textContent.replace("أهلاً،","").trim() : "Welcome!";
+
+      const image = avatar ? avatar.querySelector("img") : null;
+
+      document.getElementById("welcome-photo").src =
+        image ? image.src :
+        "data:image/svg+xml," + encodeURIComponent(
+          '<svg xmlns="http://www.w3.org/2000/svg" width="125" height="125"><rect width="100%" height="100%" fill="#1e293b"/><text x="50%" y="58%" text-anchor="middle" font-size="38" fill="#38bdf8">YA</text></svg>'
+        );
+
+      overlay.classList.add("active");
+
+      document.getElementById("account-bar").classList.add("hidden");
+      document.getElementById("app-header").classList.add("hidden");
+      document.getElementById("app-main").classList.add("hidden");
+      document.getElementById("app-footer").classList.add("hidden");
+
+      welcomeTimer = setTimeout(function() {
+
+        overlay.classList.remove("active");
+
+        document.getElementById("account-bar").classList.remove("hidden");
+        document.getElementById("app-header").classList.remove("hidden");
+        document.getElementById("app-main").classList.remove("hidden");
+        document.getElementById("app-footer").classList.remove("hidden");
+
+      }, 2000);
+
+    }
+
+    if (!loggedIn) {
+
+      wasLoggedIn = false;
+      clearTimeout(welcomeTimer);
+      overlay.classList.remove("active");
+
+    }
+
+  });
+
+  observer.observe(auth, {
+    attributes:true,
+    attributeFilter:["class"]
+  });
+
 });
-observer.observe(auth,{attributes:true,attributeFilter:["class"]});
-});
+
 </script>
 </body>
 </html>
