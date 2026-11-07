@@ -357,11 +357,21 @@ body{font-family:'Cairo',sans-serif}
               <option value="7">7 ساعات</option>
               <option value="8">8 ساعات</option>
             </select>
+            <div class="mt-4">
+              <label class="block text-xs font-bold mb-1">سبب التعويض</label>
+              <input type="text" id="compensation-reason" maxlength="120" placeholder="مثال: تعويض ساعات إضافية أو تغطية شيفت" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+            </div>
             <p class="text-xs text-slate-400 mt-2">قيمة التعويض تُحسب تلقائيًا حسب أجر الساعة من راتبك الأساسي.</p>
           </div>
-          <div id="adjustment-amount-fields" class="hidden">
-            <label id="adjustment-amount-label" class="block text-xs font-bold mb-1">قيمة الخصم بالجنيه</label>
-            <input type="number" id="adjustment-amount" min="0.01" step="0.01" placeholder="مثال: 150" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+          <div id="adjustment-amount-fields" class="hidden space-y-4">
+            <div>
+              <label id="adjustment-amount-label" class="block text-xs font-bold mb-1">قيمة الخصم بالجنيه</label>
+              <input type="number" id="adjustment-amount" min="0.01" step="0.01" placeholder="مثال: 150" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+            </div>
+            <div>
+              <label class="block text-xs font-bold mb-1">سبب الخصم الإضافي</label>
+              <input type="text" id="deduction-reason" maxlength="120" placeholder="اكتب سبب الخصم الإضافي" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+            </div>
           </div>
           <div class="p-3 rounded-xl bg-sky-100 dark:bg-sky-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
             <span id="adjustment-preview-label">قيمة خصم الغياب المتوقعة:</span>
@@ -974,13 +984,13 @@ document.addEventListener("DOMContentLoaded", () => {
         amountText = "-" + amount.toFixed(2) + " ج.م";
         amountClass = "text-rose-500 font-bold";
       } else if (item.kind === "compensation") {
-        label = "تعويض / إضافة";
+        label = item.reason ? "تعويض / إضافة - " + item.reason : "تعويض / إضافة";
         hoursText = item.hours != null ? Number(item.hours || 0) + " ساعة" : "—";
         multiplierText = item.hours != null ? "أجر الساعة" : "—";
         const compensationAmount = item.hours != null ? Number(item.hours || 0) * hourlyRate : Number(item.amount || 0);
         amountText = "+" + compensationAmount.toFixed(2) + " ج.م";
       } else if (item.kind === "deduction") {
-        label = "خصم إضافي";
+        label = item.reason ? "خصم إضافي - " + item.reason : "خصم إضافي";
         hoursText = "—";
         multiplierText = "—";
         amountText = "-" + Number(item.amount || 0).toFixed(2) + " ج.م";
@@ -1073,6 +1083,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const daysInput = $("absence-days");
     const reasonInput = $("absence-reason");
     const compensationHours = $("compensation-hours");
+    const compensationReason = $("compensation-reason");
+    const deductionReason = $("deduction-reason");
     const { dailyRate, hourlyRate } = calculateRates();
 
     absenceFields.classList.toggle("hidden", kind !== "absence");
@@ -1081,6 +1093,8 @@ document.addEventListener("DOMContentLoaded", () => {
     amountInput.required = kind === "deduction";
     daysInput.required = kind === "absence";
     reasonInput.required = kind === "absence";
+    compensationReason.required = kind === "compensation";
+    deductionReason.required = kind === "deduction";
 
     if (kind === "absence") {
       const days = Math.max(0, Number(daysInput.value) || 0);
@@ -1128,10 +1142,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const hours = Number($("compensation-hours").value);
       if (!Number.isInteger(hours) || hours < 1 || hours > 8) return alert("اختر عدد ساعات تعويض من ساعة إلى 8 ساعات.");
       record.hours = hours;
+      const reason = $("compensation-reason").value.trim();
+      if (!reason) return alert("اكتب سبب التعويض قبل التسجيل.");
+      record.reason = reason;
     } else {
       const amount = Number($("adjustment-amount").value);
       if (!Number.isFinite(amount) || amount <= 0) return alert("أدخل مبلغ خصم صحيحاً أكبر من صفر.");
       record.amount = amount;
+      const reason = $("deduction-reason").value.trim();
+      if (!reason) return alert("اكتب سبب الخصم الإضافي قبل التسجيل.");
+      record.reason = reason;
     }
 
     shiftLogs.push(record);
@@ -1142,7 +1162,11 @@ document.addEventListener("DOMContentLoaded", () => {
       $("absence-reason").value = "";
     } else if (kind === "compensation") {
       $("compensation-hours").value = "1";
-    } else $("adjustment-amount").value = "";
+      $("compensation-reason").value = "";
+    } else {
+      $("adjustment-amount").value = "";
+      $("deduction-reason").value = "";
+    }
     updateAdjustmentPreview();
   });
 
