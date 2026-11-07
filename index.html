@@ -190,7 +190,7 @@ body{font-family:'Cairo',sans-serif}
     <div class="bg-gradient-to-br from-brand-600 to-slate-900 text-white p-5 rounded-2xl shadow-md">
       <div class="text-sm text-sky-200">الصافي المستحق</div>
       <div id="card-net-salary" class="text-3xl font-extrabold mt-2">6,500.00 ج.م</div>
-      <div class="text-xs text-sky-200 mt-1">أساسي + KPI + إضافي</div>
+      <div class="text-xs text-sky-200 mt-1">أساسي + KPI + إضافي + تعويضات − خصومات</div>
     </div>
 
   </div>
@@ -346,6 +346,56 @@ body{font-family:'Cairo',sans-serif}
     </section>
   </div>
 
+  <!-- التعويضات والخصومات -->
+  <section class="bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 rounded-2xl border border-slate-700 mb-8">
+    <h2 class="text-xl font-extrabold mb-2 text-sky-500"><i class="fa-solid fa-wallet"></i> التعويضات والخصومات</h2>
+    <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">سجّل أي تعويض أو خصم، وسيتم إضافته تلقائياً إلى حساب صافي مرتبك.</p>
+    <form id="finance-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+      <div>
+        <label class="block text-xs font-bold mb-1">نوع العملية</label>
+        <select id="finance-kind" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+          <option value="compensation">➕ تعويض / مستحق إضافي</option>
+          <option value="deduction">➖ خصم</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold mb-1">المبلغ (جنيه)</label>
+        <input id="finance-amount" type="number" min="0.01" step="0.01" required placeholder="مثال: 250" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+      </div>
+      <div>
+        <label class="block text-xs font-bold mb-1">السبب / البيان</label>
+        <input id="finance-note" type="text" maxlength="100" required placeholder="مثال: تعويض مواصلات" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+      </div>
+      <div>
+        <label class="block text-xs font-bold mb-1">التاريخ</label>
+        <input id="finance-date" type="date" required class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800">
+      </div>
+      <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl"><i class="fa-solid fa-plus"></i> إضافة للسجل</button>
+    </form>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+      <div class="rounded-xl p-4 bg-emerald-950/30 border border-emerald-800/60">
+        <div class="text-xs text-emerald-400">إجمالي التعويضات</div>
+        <div id="finance-total-comp" class="text-2xl font-extrabold text-emerald-400 mt-1">0.00 ج.م</div>
+      </div>
+      <div class="rounded-xl p-4 bg-rose-950/30 border border-rose-800/60">
+        <div class="text-xs text-rose-400">إجمالي الخصومات</div>
+        <div id="finance-total-ded" class="text-2xl font-extrabold text-rose-400 mt-1">0.00 ج.م</div>
+      </div>
+    </div>
+    <div class="mt-6">
+      <h3 class="font-bold mb-3"><i class="fa-solid fa-receipt text-sky-500"></i> سجل التعويضات والخصومات</h3>
+      <div class="overflow-x-auto rounded-xl border border-slate-700">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-slate-100 dark:bg-slate-800"><tr>
+            <th class="p-3">التاريخ</th><th class="p-3">النوع</th><th class="p-3">البيان</th><th class="p-3">المبلغ</th><th class="p-3 text-center">حذف</th>
+          </tr></thead>
+          <tbody id="finance-tbody" class="divide-y divide-slate-700"></tbody>
+        </table>
+        <div id="finance-empty" class="p-6 text-center text-slate-400">لا توجد تعويضات أو خصومات مسجلة حتى الآن</div>
+      </div>
+    </div>
+  </section>
+
   <!-- الإجمالي -->
   <section class="bg-slate-900 rounded-2xl p-6 shadow-xl border border-slate-800">
     <h2 class="text-xl font-extrabold mb-5 text-sky-400">
@@ -353,7 +403,7 @@ body{font-family:'Cairo',sans-serif}
       الإجمالي الشامل المستحق
     </h2>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
       <div class="bg-slate-800 p-4 rounded-xl">
         <span class="text-xs text-slate-400 block">المرتب الأساسي</span>
         <span id="footer-base-salary" class="text-lg font-bold">6,000.00 ج.م</span>
@@ -378,12 +428,20 @@ body{font-family:'Cairo',sans-serif}
         <span class="text-xs text-slate-400 block">عدد الشيفتات</span>
         <span id="footer-shift-count" class="text-lg font-bold text-purple-400">0 شيفت</span>
       </div>
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">التعويضات</span>
+        <span id="footer-compensation" class="text-lg font-bold text-emerald-400">0.00 ج.م</span>
+      </div>
+      <div class="bg-slate-800 p-4 rounded-xl">
+        <span class="text-xs text-slate-400 block">الخصومات</span>
+        <span id="footer-deductions" class="text-lg font-bold text-rose-400">0.00 ج.م</span>
+      </div>
     </div>
 
     <div class="bg-gradient-to-r from-sky-900/60 via-slate-800 to-sky-900/60 p-5 rounded-xl border border-sky-500/30 flex flex-col sm:flex-row items-center justify-between gap-4">
       <div>
         <div class="text-sm text-sky-200">الصافي النهائي المستحق</div>
-        <div class="text-xs text-slate-400">أساسي + KPI + إضافي</div>
+        <div class="text-xs text-slate-400">أساسي + KPI + إضافي + تعويضات − خصومات</div>
       </div>
       <div id="footer-final-total" class="text-3xl sm:text-4xl font-extrabold text-sky-300">6,500.00 ج.م</div>
     </div>
@@ -594,6 +652,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     initDatePicker();
+    $("finance-date").value = $("entry-date").value;
     updateEgyptTime();
     updateEntryPreview();
     renderSummaryAndTable();
@@ -649,7 +708,6 @@ document.addEventListener("DOMContentLoaded", () => {
       userAvatar = data.avatar || null;
       isDarkMode = data.theme !== "light";
     } else {
-      // حساب جديد: يبدأ ببيانات مستقلة تماماً.
       baseSalary = 6000;
       kpiBonus = 500;
       shiftLogs = [];
@@ -843,12 +901,21 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalPay = 0;
     let totalHours = 0;
 
-    shiftLogs.forEach(item => {
+    let totalCompensation = 0;
+    let totalDeductions = 0;
+    const shiftEntries = shiftLogs.filter(item => !item.kind || item.kind === "shift");
+    const financeEntries = shiftLogs.filter(item => item.kind === "compensation" || item.kind === "deduction");
+
+    shiftEntries.forEach(item => {
       totalPay += Number(item.hours) * hourlyRate * Number(item.multiplier);
       totalHours += Number(item.hours);
     });
+    financeEntries.forEach(item => {
+      if (item.kind === "compensation") totalCompensation += Number(item.amount) || 0;
+      if (item.kind === "deduction") totalDeductions += Number(item.amount) || 0;
+    });
 
-    const net = baseSalary + kpiBonus + totalPay;
+    const net = baseSalary + kpiBonus + totalPay + totalCompensation - totalDeductions;
 
     $("card-base-salary").textContent =
       baseSalary.toLocaleString("en-US") + " ج.م";
@@ -859,12 +926,16 @@ document.addEventListener("DOMContentLoaded", () => {
     $("card-total-overtime-pay").textContent = totalPay.toFixed(2) + " ج.م";
     $("card-total-overtime-hours").textContent = totalHours + " ساعة";
     $("card-net-salary").textContent = net.toFixed(2) + " ج.م";
+    $("finance-total-comp").textContent = totalCompensation.toFixed(2) + " ج.م";
+    $("finance-total-ded").textContent = totalDeductions.toFixed(2) + " ج.م";
+    $("footer-compensation").textContent = totalCompensation.toFixed(2) + " ج.م";
+    $("footer-deductions").textContent = totalDeductions.toFixed(2) + " ج.م";
 
     $("footer-base-salary").textContent = baseSalary.toFixed(2) + " ج.م";
     $("footer-kpi-bonus").textContent = kpiBonus.toFixed(2) + " ج.م";
     $("footer-total-hours").textContent = totalHours + " ساعة";
     $("footer-total-overtime").textContent = totalPay.toFixed(2) + " ج.م";
-    $("footer-shift-count").textContent = shiftLogs.length + " شيفت";
+    $("footer-shift-count").textContent = shiftEntries.length + " شيفت";
     $("footer-final-total").textContent = net.toFixed(2) + " ج.م";
 
     const tbody = $("shifts-tbody");
@@ -872,14 +943,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tbody.innerHTML = "";
 
-    if (!shiftLogs.length) {
+    if (!shiftEntries.length) {
       empty.classList.remove("hidden");
-      return;
+    } else {
+      empty.classList.add("hidden");
     }
 
-    empty.classList.add("hidden");
-
-    [...shiftLogs]
+    [...shiftEntries]
       .sort((a,b) => new Date(b.date) - new Date(a.date))
       .forEach(item => {
         const pay =
@@ -933,6 +1003,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         tbody.appendChild(tr);
       });
+
+    const financeBody = $("finance-tbody");
+    const financeEmpty = $("finance-empty");
+    financeBody.innerHTML = "";
+    if (!financeEntries.length) {
+      financeEmpty.classList.remove("hidden");
+    } else {
+      financeEmpty.classList.add("hidden");
+      [...financeEntries].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/50";
+        const cells = [
+          item.date || "",
+          item.kind === "compensation" ? "➕ تعويض" : "➖ خصم",
+          item.note || "",
+          (Number(item.amount) || 0).toFixed(2) + " ج.م"
+        ];
+        cells.forEach((value, index) => {
+          const td = document.createElement("td");
+          td.className = "p-3";
+          td.textContent = value;
+          if (index === 3) td.classList.add(item.kind === "compensation" ? "text-emerald-400" : "text-rose-400", "font-bold");
+          tr.appendChild(td);
+        });
+        const action = document.createElement("td");
+        action.className = "p-3 text-center";
+        const btn = document.createElement("button");
+        btn.className = "text-rose-500 p-2";
+        btn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+        btn.title = "حذف العملية";
+        btn.addEventListener("click", () => deleteFinanceEntry(item.id));
+        action.appendChild(btn);
+        tr.appendChild(action);
+        financeBody.appendChild(tr);
+      });
+    }
   }
 
   $("base-salary-input").addEventListener("input", e => {
@@ -984,6 +1090,37 @@ document.addEventListener("DOMContentLoaded", () => {
     updateEntryPreview();
   });
 
+  $("finance-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const amount = Number($("finance-amount").value);
+    const note = $("finance-note").value.trim();
+    const date = $("finance-date").value;
+    const kind = $("finance-kind").value;
+    if (!Number.isFinite(amount) || amount <= 0 || !note || !date) {
+      alert("من فضلك أدخل مبلغاً صحيحاً والبيان والتاريخ.");
+      return;
+    }
+    shiftLogs.push({
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+      kind,
+      amount,
+      note,
+      date
+    });
+    saveState();
+    renderSummaryAndTable();
+    $("finance-amount").value = "";
+    $("finance-note").value = "";
+    $("finance-kind").value = "compensation";
+  });
+
+  function deleteFinanceEntry(id) {
+    if (!confirm("هل تريد حذف هذه العملية؟")) return;
+    shiftLogs = shiftLogs.filter(item => item.id !== id);
+    saveState();
+    renderSummaryAndTable();
+  }
+
   function deleteShiftEntry(id) {
     shiftLogs = shiftLogs.filter(item => item.id !== id);
     saveState();
@@ -993,7 +1130,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("clear-all-btn").addEventListener("click", () => {
     if (!shiftLogs.length) return;
 
-    if (!confirm("متأكد إنك عايز تمسح كل الشيفتات؟")) return;
+    if (!confirm("متأكد إنك عايز تمسح كل الشيفتات والتعويضات والخصومات؟")) return;
 
     shiftLogs = [];
     saveState();
