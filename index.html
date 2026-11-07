@@ -345,8 +345,22 @@ body{font-family:'Cairo',sans-serif}
               <input type="text" id="absence-reason" maxlength="120" required placeholder="مثال: غياب بدون إذن أو تأخير أو جزاء إداري" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
             </div>
           </div>
+          <div id="compensation-hours-fields" class="hidden">
+            <label class="block text-xs font-bold mb-1">عدد ساعات التعويض</label>
+            <select id="compensation-hours" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
+              <option value="1" selected>ساعة واحدة</option>
+              <option value="2">ساعتان</option>
+              <option value="3">3 ساعات</option>
+              <option value="4">4 ساعات</option>
+              <option value="5">5 ساعات</option>
+              <option value="6">6 ساعات</option>
+              <option value="7">7 ساعات</option>
+              <option value="8">8 ساعات</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-2">قيمة التعويض تُحسب تلقائيًا حسب أجر الساعة من راتبك الأساسي.</p>
+          </div>
           <div id="adjustment-amount-fields" class="hidden">
-            <label id="adjustment-amount-label" class="block text-xs font-bold mb-1">المبلغ بالجنيه</label>
+            <label id="adjustment-amount-label" class="block text-xs font-bold mb-1">قيمة الخصم بالجنيه</label>
             <input type="number" id="adjustment-amount" min="0.01" step="0.01" placeholder="مثال: 150" class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold">
           </div>
           <div class="p-3 rounded-xl bg-sky-100 dark:bg-sky-950/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-sm">
@@ -910,7 +924,7 @@ document.addEventListener("DOMContentLoaded", () => {
       totalHours += Number(item.hours || 0);
     });
 
-    const totalCompensation = compensationEntries.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const totalCompensation = compensationEntries.reduce((sum, item) => sum + (item.hours != null ? Number(item.hours || 0) * hourlyRate : Number(item.amount || 0)), 0);
     const totalOtherDeductions = deductionEntries.reduce((sum, item) => sum + Number(item.amount || 0), 0);
     const totalAbsenceDays = absenceEntries.reduce((sum, item) => sum + Number(item.days || 0), 0);
     const absenceDeduction = totalAbsenceDays * dailyRate;
@@ -961,9 +975,10 @@ document.addEventListener("DOMContentLoaded", () => {
         amountClass = "text-rose-500 font-bold";
       } else if (item.kind === "compensation") {
         label = "تعويض / إضافة";
-        hoursText = "—";
-        multiplierText = "—";
-        amountText = "+" + Number(item.amount || 0).toFixed(2) + " ج.م";
+        hoursText = item.hours != null ? Number(item.hours || 0) + " ساعة" : "—";
+        multiplierText = item.hours != null ? "أجر الساعة" : "—";
+        const compensationAmount = item.hours != null ? Number(item.hours || 0) * hourlyRate : Number(item.amount || 0);
+        amountText = "+" + compensationAmount.toFixed(2) + " ج.م";
       } else if (item.kind === "deduction") {
         label = "خصم إضافي";
         hoursText = "—";
@@ -1052,15 +1067,18 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateAdjustmentPreview() {
     const kind = $("adjustment-kind").value;
     const amountFields = $("adjustment-amount-fields");
+    const compensationFields = $("compensation-hours-fields");
     const absenceFields = $("absence-fields");
     const amountInput = $("adjustment-amount");
     const daysInput = $("absence-days");
     const reasonInput = $("absence-reason");
-    const { dailyRate } = calculateRates();
+    const compensationHours = $("compensation-hours");
+    const { dailyRate, hourlyRate } = calculateRates();
 
     absenceFields.classList.toggle("hidden", kind !== "absence");
-    amountFields.classList.toggle("hidden", kind === "absence");
-    amountInput.required = kind !== "absence";
+    compensationFields.classList.toggle("hidden", kind !== "compensation");
+    amountFields.classList.toggle("hidden", kind !== "deduction");
+    amountInput.required = kind === "deduction";
     daysInput.required = kind === "absence";
     reasonInput.required = kind === "absence";
 
@@ -1068,17 +1086,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const days = Math.max(0, Number(daysInput.value) || 0);
       $("adjustment-preview-label").textContent = "قيمة خصم الغياب من الأساسي:";
       $("adjustment-preview").textContent = (days * dailyRate).toFixed(2) + " ج.م";
+    } else if (kind === "compensation") {
+      const hours = Math.max(0, Number(compensationHours.value) || 0);
+      $("adjustment-preview-label").textContent = "قيمة التعويض المضافة تلقائيًا:";
+      $("adjustment-preview").textContent = (hours * hourlyRate).toFixed(2) + " ج.م";
     } else {
       const amount = Math.max(0, Number(amountInput.value) || 0);
-      $("adjustment-preview-label").textContent = kind === "compensation" ? "قيمة التعويض المضافة:" : "قيمة الخصم الإضافي:";
+      $("adjustment-preview-label").textContent = "قيمة الخصم الإضافي:";
       $("adjustment-preview").textContent = amount.toFixed(2) + " ج.م";
-      $("adjustment-amount-label").textContent = kind === "compensation" ? "قيمة التعويض بالجنيه" : "قيمة الخصم بالجنيه";
+      $("adjustment-amount-label").textContent = "قيمة الخصم بالجنيه";
     }
   }
 
   $("adjustment-kind").addEventListener("change", updateAdjustmentPreview);
   $("adjustment-amount").addEventListener("input", updateAdjustmentPreview);
   $("absence-days").addEventListener("change", updateAdjustmentPreview);
+  $("compensation-hours").addEventListener("change", updateAdjustmentPreview);
 
   $("adjustment-form").addEventListener("submit", e => {
     e.preventDefault();
@@ -1101,9 +1124,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const reason = $("absence-reason").value.trim();
       if (!reason) return alert("اكتب سبب الخصم قبل التسجيل.");
       record.reason = reason;
+    } else if (kind === "compensation") {
+      const hours = Number($("compensation-hours").value);
+      if (!Number.isInteger(hours) || hours < 1 || hours > 8) return alert("اختر عدد ساعات تعويض من ساعة إلى 8 ساعات.");
+      record.hours = hours;
     } else {
       const amount = Number($("adjustment-amount").value);
-      if (!Number.isFinite(amount) || amount <= 0) return alert("أدخل مبلغاً صحيحاً أكبر من صفر.");
+      if (!Number.isFinite(amount) || amount <= 0) return alert("أدخل مبلغ خصم صحيحاً أكبر من صفر.");
       record.amount = amount;
     }
 
@@ -1113,6 +1140,8 @@ document.addEventListener("DOMContentLoaded", () => {
     if (kind === "absence") {
       $("absence-days").value = "1";
       $("absence-reason").value = "";
+    } else if (kind === "compensation") {
+      $("compensation-hours").value = "1";
     } else $("adjustment-amount").value = "";
     updateAdjustmentPreview();
   });
