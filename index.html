@@ -195,6 +195,43 @@ body{font-family:'Cairo',sans-serif}
 
   </div>
 
+
+  <!-- لوحة التحليلات -->
+  <section id="analytics-section" class="mb-8 bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-700 shadow-xl">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-5">
+      <div>
+        <h2 class="text-xl font-extrabold text-sky-400"><i class="fa-solid fa-chart-line ml-1"></i> تحليلات الأوفر شيفت</h2>
+        <p class="text-xs text-slate-400 mt-1">إحصائيات مبنية على شيفتات الأوفر المسجلة فقط</p>
+      </div>
+      <span class="text-xs text-slate-400 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2">الأسبوع الحالي: الاثنين – الأحد</span>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">إجمالي الساعات</div><div id="analytics-total-hours" class="text-2xl font-black text-sky-300 mt-2">0</div></div>
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">أيام الأوفر</div><div id="analytics-days-count" class="text-2xl font-black text-white mt-2">0</div></div>
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">أكثر يوم نشاطًا</div><div id="analytics-most-day" class="text-lg font-extrabold text-emerald-300 mt-2">—</div></div>
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">أقل يوم نشاطًا</div><div id="analytics-least-day" class="text-lg font-extrabold text-amber-300 mt-2">—</div></div>
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">آخر أوفر</div><div id="analytics-last-date" class="text-lg font-extrabold text-white mt-2">—</div></div>
+      <div class="bg-slate-800 rounded-xl p-4"><div class="text-xs text-slate-400">منذ آخر أوفر</div><div id="analytics-days-ago" class="text-2xl font-black text-purple-300 mt-2">—</div></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+      <div class="lg:col-span-3 bg-slate-800 rounded-xl p-4">
+        <div class="flex items-center justify-between gap-2 mb-4">
+          <h3 class="font-bold text-white">ساعات الأوفر خلال الأسبوع</h3>
+          <span id="analytics-week-total" class="text-sm font-bold text-sky-300">0 ساعة</span>
+        </div>
+        <div id="analytics-week-chart" class="grid grid-cols-7 gap-2 items-end h-36" aria-label="رسم ساعات الأوفر حسب أيام الأسبوع"></div>
+        <div class="text-center text-xs text-slate-500 mt-3">عدد الساعات المسجلة من الاثنين إلى الأحد</div>
+      </div>
+      <div class="lg:col-span-2 bg-gradient-to-br from-sky-950 to-slate-800 rounded-xl p-5 border border-sky-900/70 flex flex-col justify-center">
+        <div class="text-sky-300 text-sm font-bold mb-2"><i class="fa-solid fa-lightbulb ml-1"></i> رسالة Over Shift</div>
+        <p id="analytics-motivation" class="text-white font-bold leading-8">ابدأ تسجيل أول شيفت أوفر، وخلي إنجازك ظاهر قدامك.</p>
+        <p id="analytics-week-caption" class="text-xs text-slate-400 mt-3">تابع تقدمك أسبوعًا بعد أسبوع.</p>
+      </div>
+    </div>
+  </section>
+
   <!-- الإعدادات والسجل -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
 
@@ -920,12 +957,126 @@ document.addEventListener("DOMContentLoaded", () => {
       (hours * hourlyRate * multiplier).toFixed(2) + " ج.م";
   }
 
+
+  // تحليلات الأوفر: تعتمد على الشيفتات العادية فقط، ولا تشمل التعويضات أو الخصومات أو الغياب.
+  function renderAnalytics(normalShifts) {
+    const dayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+    const valid = normalShifts.filter(item => {
+      const hours = Number(item.hours);
+      return /^\d{4}-\d{2}-\d{2}$/.test(String(item.date || "")) &&
+        Number.isFinite(hours) && hours > 0;
+    });
+
+    const parseDate = value => {
+      const [year, month, day] = value.split("-").map(Number);
+      return new Date(year, month - 1, day);
+    };
+    const formatDate = value => {
+      if (!value) return "—";
+      return new Intl.DateTimeFormat("ar-EG", {
+        timeZone: "Africa/Cairo", day: "numeric", month: "short", year: "numeric"
+      }).format(parseDate(value));
+    };
+    const cairoTodayParts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit"
+    }).formatToParts(new Date());
+    const part = type => cairoTodayParts.find(x => x.type === type)?.value;
+    const todayString = `${part("year")}-${part("month")}-${part("day")}`;
+    const today = parseDate(todayString);
+    const todayDay = today.getDay();
+
+    const uniqueDates = [...new Set(valid.map(item => item.date))].sort();
+    const totalHours = valid.reduce((sum, item) => sum + Number(item.hours), 0);
+    const weekdayCounts = Array(7).fill(0);
+    uniqueDates.forEach(date => weekdayCounts[parseDate(date).getDay()]++);
+
+    let mostText = "—";
+    let leastText = "—";
+    if (uniqueDates.length) {
+      const activeCounts = weekdayCounts.filter(count => count > 0);
+      const maxCount = Math.max(...activeCounts);
+      const minCount = Math.min(...activeCounts);
+      mostText = dayNames.map((name, i) => weekdayCounts[i] === maxCount ? name : null).filter(Boolean).join("، ");
+      leastText = dayNames.map((name, i) => weekdayCounts[i] === minCount ? name : null).filter(Boolean).join("، ");
+    }
+
+    const lastDate = uniqueDates.length ? uniqueDates[uniqueDates.length - 1] : null;
+    const daysAgo = lastDate
+      ? Math.max(0, Math.round((today - parseDate(lastDate)) / 86400000))
+      : null;
+
+    // الأسبوع من الاثنين إلى الأحد.
+    const mondayOffset = (todayDay + 6) % 7;
+    const monday = new Date(today);
+    monday.setDate(today.getDate() - mondayOffset);
+    const weekDates = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    });
+    const weekHours = Array(7).fill(0);
+    valid.forEach(item => {
+      const index = weekDates.indexOf(item.date);
+      if (index >= 0) weekHours[index] += Number(item.hours);
+    });
+    const weekTotal = weekHours.reduce((sum, hours) => sum + hours, 0);
+
+    $("analytics-total-hours").textContent = Number(totalHours.toFixed(2)).toString() + " س";
+    $("analytics-days-count").textContent = uniqueDates.length;
+    $("analytics-most-day").textContent = mostText;
+    $("analytics-least-day").textContent = leastText;
+    $("analytics-last-date").textContent = formatDate(lastDate);
+    $("analytics-days-ago").textContent = daysAgo === null ? "—" : (daysAgo === 0 ? "النهارده" : daysAgo + " يوم");
+    $("analytics-week-total").textContent = Number(weekTotal.toFixed(2)).toString() + " ساعة";
+
+    const chart = $("analytics-week-chart");
+    chart.innerHTML = "";
+    const maxHours = Math.max(...weekHours, 1);
+    weekHours.forEach((hours, index) => {
+      const column = document.createElement("div");
+      column.className = "h-full flex flex-col items-center justify-end gap-2 min-w-0";
+      const value = document.createElement("span");
+      value.className = "text-[10px] text-slate-300 font-bold";
+      value.textContent = hours ? Number(hours.toFixed(1)).toString() : "0";
+      const track = document.createElement("div");
+      track.className = "w-full max-w-8 h-24 bg-slate-700 rounded-t-md flex items-end overflow-hidden";
+      const bar = document.createElement("div");
+      bar.className = "w-full rounded-t-md bg-sky-500 transition-all";
+      bar.style.height = hours ? Math.max(5, (hours / maxHours) * 100) + "%" : "0%";
+      bar.title = dayNames[(index + 1) % 7] + ": " + hours + " ساعة";
+      track.appendChild(bar);
+      const label = document.createElement("span");
+      label.className = "text-[10px] sm:text-xs text-slate-400";
+      label.textContent = ["اثن","ثلا","أرب","خمي","جمع","سبت","أحد"][index];
+      column.append(value, track, label);
+      chart.appendChild(column);
+    });
+
+    let motivation;
+    if (!valid.length) {
+      motivation = "ابدأ تسجيل أول شيفت أوفر، وخلي إنجازك ظاهر قدامك.";
+    } else if (daysAgo === 0) {
+      motivation = "عاش! سجلت أوفر النهارده. استمر بنفس الحماس ووازن بين شغلك وراحتك.";
+    } else if (daysAgo <= 3) {
+      motivation = "أداء ممتاز! آخر أوفر كان من " + daysAgo + " يوم. حافظ على الاستمرارية.";
+    } else if (weekTotal > 0) {
+      motivation = "أنت بدأت تحقق تقدم الأسبوع ده. كل ساعة بتسجلها بتقربك من هدفك.";
+    } else {
+      motivation = "بقالك " + daysAgo + " يوم من آخر أوفر. لما تسجل الشيفت الجاي هتلاقي تقدمك بيتحدث تلقائيًا.";
+    }
+    $("analytics-motivation").textContent = motivation;
+    $("analytics-week-caption").textContent = weekTotal > 0
+      ? "سجلت " + Number(weekTotal.toFixed(2)) + " ساعة أوفر الأسبوع الحالي."
+      : "لسه مفيش ساعات أوفر مسجلة الأسبوع الحالي.";
+  }
+
   function renderSummaryAndTable() {
     const { dailyRate, hourlyRate } = calculateRates();
     const normalShifts = shiftLogs.filter(item => !item.kind || item.kind === "shift");
     const compensationEntries = shiftLogs.filter(item => item.kind === "compensation");
     const deductionEntries = shiftLogs.filter(item => item.kind === "deduction");
     const absenceEntries = shiftLogs.filter(item => item.kind === "absence");
+    renderAnalytics(normalShifts);
 
     let totalPay = 0;
     let totalHours = 0;
