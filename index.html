@@ -1521,5 +1521,127 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 </script>
+  
+<!-- YAYA SPLASH SCREEN -->
+<div id="yaya-splash">
+  <div class="yaya-content">
+    <div class="yaya-brand">
+      <span class="yaya-bolt">⚡</span>
+      <span class="yaya-logo">YAYA</span>
+    </div>
+
+    <div class="yaya-subtitle">OVER SHIFT</div>
+    <div class="yaya-name">YEHIA AYMAN</div>
+
+    <div class="yaya-loader">
+      <span></span>
+    </div>
+  </div>
+</div>
+
+<style>
+#yaya-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(ellipse at center, #111b35 0%, #080d20 65%, #050817 100%);
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .7s ease, visibility .7s ease;
+}
+
+#yaya-splash.hide {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.yaya-content {
+  text-align: center;
+  animation: yayaEnter 1s ease both;
+}
+
+.yaya-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.yaya-logo {
+  font-size: clamp(55px, 15vw, 85px);
+  font-weight: 900;
+  letter-spacing: 5px;
+  color: #38bdf8;
+  text-shadow: 0 0 25px #0ea5e955;
+}
+
+.yaya-bolt {
+  color: #facc15;
+  font-size: 55px;
+  filter: drop-shadow(0 0 12px #facc1566);
+}
+
+.yaya-subtitle {
+  color: #38bdf8;
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 7px;
+  margin-top: 8px;
+}
+
+.yaya-name {
+  color: #94a3b8;
+  font-size: 12px;
+  letter-spacing: 5px;
+  margin-top: 13px;
+}
+
+.yaya-loader {
+  width: 110px;
+  height: 3px;
+  background: #26334d;
+  border-radius: 10px;
+  margin: 35px auto 0;
+  overflow: hidden;
+}
+
+.yaya-loader span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: #0ea5e9;
+  border-radius: 10px;
+  animation: yayaLoading 1.2s infinite ease-in-out;
+}
+
+@keyframes yayaLoading {
+  from { transform: translateX(-110px); }
+  to { transform: translateX(110px); }
+}
+
+@keyframes yayaEnter {
+  from { opacity: 0; transform: scale(.88); }
+  to { opacity: 1; transform: scale(1); }
+}
+</style>
+
+<script>
+window.addEventListener("load", function () {
+  setTimeout(function () {
+    const splash = document.getElementById("yaya-splash");
+    if (splash) {
+      splash.classList.add("hide");
+      setTimeout(function () {
+        splash.remove();
+      }, 750);
+    }
+  }, 2200);
+});
+</script>
+
 </body>
 </html>
