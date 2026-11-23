@@ -841,17 +841,31 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
+  // دورة المرتب: من يوم 26 حتى يوم 25 من الشهر التالي.
+  // مفتاح الدورة هو شهر الانتهاء؛ مثال 2026-12 = من 26 نوفمبر إلى 25 ديسمبر.
   function getCurrentMonthKey() {
     const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Africa/Cairo", year: "numeric", month: "2-digit"
+      timeZone: "Africa/Cairo", year: "numeric", month: "2-digit", day: "2-digit"
     }).formatToParts(new Date());
-    const year = parts.find(p => p.type === "year")?.value;
-    const month = parts.find(p => p.type === "month")?.value;
-    return `${year}-${month}`;
+    const year = Number(parts.find(p => p.type === "year")?.value);
+    const month = Number(parts.find(p => p.type === "month")?.value);
+    const day = Number(parts.find(p => p.type === "day")?.value);
+    const endMonth = new Date(year, month - 1 + (day >= 26 ? 1 : 0), 1);
+    return `${endMonth.getFullYear()}-${String(endMonth.getMonth() + 1).padStart(2, "0")}`;
   }
 
   function monthKeyFromDate(date) {
-    return /^\d{4}-\d{2}-\d{2}$/.test(String(date || "")) ? String(date).slice(0, 7) : "";
+    const value = String(date || "");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return "";
+    const [year, month, day] = value.split("-").map(Number);
+    const endMonth = new Date(year, month - 1 + (day >= 26 ? 1 : 0), 1);
+    return `${endMonth.getFullYear()}-${String(endMonth.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function monthPeriodStartDate(key) {
+    const [year, month] = key.split("-").map(Number);
+    const start = new Date(year, month - 2, 26);
+    return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`;
   }
 
   function monthLabel(key) {
@@ -1046,8 +1060,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     renderSummaryAndTable();
     refreshMonthControls();
-    $("entry-date").value = activeMonthKey + "-01";
-    $("adjustment-date").value = activeMonthKey + "-01";
+    $("entry-date").value = monthPeriodStartDate(activeMonthKey);
+    $("adjustment-date").value = monthPeriodStartDate(activeMonthKey);
     alert("تم إقفال الشهر وحفظ أرشيفه بنجاح. بدأت شهر " + monthLabel(activeMonthKey) + ".");
   }
 
@@ -1289,7 +1303,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const now = new Date();
 
     const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-    const defaultDate = activeMonthKey === today.slice(0, 7) ? today : activeMonthKey + "-01";
+    const defaultDate = monthKeyFromDate(today) === activeMonthKey ? today : monthPeriodStartDate(activeMonthKey);
     $("entry-date").value = defaultDate;
     $("adjustment-date").value = defaultDate;
   }
