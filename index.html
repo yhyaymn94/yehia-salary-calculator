@@ -266,6 +266,47 @@ html:not(.dark) #yaya-splash{background:radial-gradient(ellipse at center,#e8f3f
     </div>
   </section>
 
+
+  <!-- نظام الشهور والأرشيف -->
+  <section id="monthly-section" class="mb-8 bg-slate-900 rounded-2xl p-5 sm:p-6 border border-slate-700 shadow-xl">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <h2 class="text-xl font-extrabold text-sky-400"><i class="fa-solid fa-calendar-days ml-1"></i> إدارة الشهور والأرشيف</h2>
+        <p class="text-sm text-slate-400 mt-1">اقفل الشهر بعد ما يخلص، وابدأ شهر جديد مع الاحتفاظ بكل تفاصيل الشهر القديم.</p>
+        <div class="mt-3 text-sm text-slate-300">الشهر النشط: <strong id="active-month-label" class="text-emerald-300">—</strong></div>
+      </div>
+      <button id="close-month-btn" type="button" class="w-full lg:w-auto px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold">
+        <i class="fa-solid fa-lock ml-1"></i> إقفال الشهر وبدء شهر جديد
+      </button>
+    </div>
+    <div class="mt-5 pt-5 border-t border-slate-700 grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-3">
+      <select id="archive-month-select" class="w-full p-3 rounded-xl border border-slate-700 bg-slate-800 text-white">
+        <option value="">اختر شهرًا من الأرشيف</option>
+      </select>
+      <button id="view-archive-btn" type="button" class="px-5 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold">عرض الأرشيف</button>
+      <button id="reopen-month-btn" type="button" class="hidden px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold">إعادة فتح الشهر</button>
+    </div>
+    <div id="archive-details" class="hidden mt-5 p-4 sm:p-5 rounded-xl bg-slate-800 border border-slate-700">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+        <div>
+          <h3 id="archive-title" class="text-lg font-extrabold text-sky-300">أرشيف الشهر</h3>
+          <p id="archive-closed-at" class="text-xs text-slate-400 mt-1"></p>
+        </div>
+        <span class="text-xs text-emerald-300 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">محفوظ — للعرض</span>
+      </div>
+      <div id="archive-summary" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-5"></div>
+      <div class="overflow-x-auto rounded-xl border border-slate-700">
+        <table class="w-full text-right text-sm">
+          <thead class="bg-slate-700 font-bold">
+            <tr><th class="p-3">التاريخ</th><th class="p-3">البيان</th><th class="p-3">الساعات / الأيام</th><th class="p-3">المعامل</th><th class="p-3">المبلغ</th></tr>
+          </thead>
+          <tbody id="archive-tbody" class="divide-y divide-slate-700"></tbody>
+        </table>
+      </div>
+      <p id="archive-empty" class="hidden text-center text-slate-400 py-5">لا توجد حركات مسجلة في هذا الشهر.</p>
+    </div>
+  </section>
+
   <!-- الإعدادات والسجل -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
 
@@ -562,6 +603,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let baseSalary = 6000;
   let kpiBonus = 500;
   let shiftLogs = [];
+  // الأرشيف محفوظ داخل نفس عمود shifts حتى لا نحتاج إلى تغيير جداول Supabase.
+  let activeMonthKey = getCurrentMonthKey();
+  let monthArchives = {};
+  let viewingArchiveKey = null;
   let userAvatar = null;
   let accountInitials = "YA";
   let isDarkMode = true;
@@ -795,6 +840,245 @@ document.addEventListener("DOMContentLoaded", () => {
     $("auth-screen").classList.add("hidden");
   }
 
+
+  function getCurrentMonthKey() {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Africa/Cairo", year: "numeric", month: "2-digit"
+    }).formatToParts(new Date());
+    const year = parts.find(p => p.type === "year")?.value;
+    const month = parts.find(p => p.type === "month")?.value;
+    return `${year}-${month}`;
+  }
+
+  function monthKeyFromDate(date) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(String(date || "")) ? String(date).slice(0, 7) : "";
+  }
+
+  function monthLabel(key) {
+    if (!/^\d{4}-\d{2}$/.test(String(key || ""))) return key || "شهر غير محدد";
+    const [year, month] = key.split("-").map(Number);
+    return new Intl.DateTimeFormat("ar-EG", {
+      month: "long", year: "numeric", timeZone: "Africa/Cairo"
+    }).format(new Date(year, month - 1, 1));
+  }
+
+  function nextMonthKey(key) {
+    const [year, month] = key.split("-").map(Number);
+    const date = new Date(year, month, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+  }
+
+  function calculateMonthSnapshot(key, entries, salary = baseSalary, kpi = kpiBonus) {
+    const dailyRate = Number(salary || 0) / 26;
+    const hourlyRate = dailyRate / 8;
+    const normal = entries.filter(item => !item.kind || item.kind === "shift");
+    const compensations = entries.filter(item => item.kind === "compensation");
+    const deductions = entries.filter(item => item.kind === "deduction");
+    const absences = entries.filter(item => item.kind === "absence");
+    const overtimeHours = normal.reduce((sum, item) => sum + Number(item.hours || 0), 0);
+    const overtimePay = normal.reduce((sum, item) =>
+      sum + Number(item.hours || 0) * hourlyRate * Number(item.multiplier || 1.5), 0);
+    const compensationTotal = compensations.reduce((sum, item) =>
+      sum + (item.hours != null ? Number(item.hours || 0) * hourlyRate : Number(item.amount || 0)), 0);
+    const otherDeductions = deductions.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+    const absenceDays = absences.reduce((sum, item) => sum + Number(item.days || 0), 0);
+    const absenceDeduction = absenceDays * dailyRate;
+    const net = Number(salary || 0) + Number(kpi || 0) + overtimePay +
+      compensationTotal - otherDeductions - absenceDeduction;
+
+    return {
+      monthKey: key,
+      baseSalary: Number(salary || 0),
+      kpiBonus: Number(kpi || 0),
+      dailyRate, hourlyRate,
+      overtimeHours, overtimeDays: new Set(normal.map(item => item.date)).size,
+      overtimeCount: normal.length, overtimePay,
+      compensationTotal, otherDeductions,
+      absenceDays, absenceDeduction, net
+    };
+  }
+
+  function createMonthArchive(key, entries) {
+    const safeEntries = entries.map(item => ({ ...item }));
+    return {
+      monthKey: key,
+      closedAt: new Date().toISOString(),
+      entries: safeEntries,
+      totals: calculateMonthSnapshot(key, safeEntries)
+    };
+  }
+
+  function migrateLegacyMonths(records) {
+    const currentKey = getCurrentMonthKey();
+    const current = [];
+    const grouped = {};
+    records.forEach(item => {
+      const key = monthKeyFromDate(item.date);
+      if (!key || key >= currentKey) {
+        current.push(item);
+      } else {
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(item);
+      }
+    });
+    Object.keys(grouped).sort().forEach(key => {
+      if (!monthArchives[key]) monthArchives[key] = createMonthArchive(key, grouped[key]);
+    });
+    activeMonthKey = currentKey;
+    return current;
+  }
+
+  function refreshMonthControls() {
+    const label = $("active-month-label");
+    if (label) label.textContent = monthLabel(activeMonthKey);
+    const select = $("archive-month-select");
+    if (!select) return;
+    const selected = select.value;
+    select.innerHTML = '<option value="">اختر شهرًا من الأرشيف</option>';
+    Object.keys(monthArchives).sort().reverse().forEach(key => {
+      const option = document.createElement("option");
+      option.value = key;
+      option.textContent = monthLabel(key);
+      select.appendChild(option);
+    });
+    if (monthArchives[selected]) select.value = selected;
+  }
+
+  function showArchive(key) {
+    const archive = monthArchives[key];
+    if (!archive) return alert("الأرشيف المطلوب غير موجود.");
+    viewingArchiveKey = key;
+    $("archive-details").classList.remove("hidden");
+    $("archive-title").textContent = "أرشيف " + monthLabel(key);
+    $("archive-closed-at").textContent = archive.closedAt
+      ? "تاريخ الإقفال: " + new Date(archive.closedAt).toLocaleString("ar-EG")
+      : "أرشيف محفوظ";
+    $("reopen-month-btn").classList.remove("hidden");
+
+    const totals = archive.totals || calculateMonthSnapshot(key, archive.entries || []);
+    const cards = [
+      ["المرتب الأساسي", totals.baseSalary],
+      ["KPI", totals.kpiBonus],
+      ["أيام الأوفر", totals.overtimeDays],
+      ["عدد شيفتات الأوفر", totals.overtimeCount],
+      ["ساعات الأوفر", totals.overtimeHours, " ساعة"],
+      ["فلوس الأوفر", totals.overtimePay],
+      ["التعويضات", totals.compensationTotal],
+      ["الخصومات الإضافية", totals.otherDeductions],
+      ["أيام الغياب", totals.absenceDays, " يوم"],
+      ["خصم الغياب", totals.absenceDeduction],
+      ["الصافي النهائي", totals.net]
+    ];
+    $("archive-summary").innerHTML = "";
+    cards.forEach(([title, value, suffix = " ج.م"]) => {
+      const card = document.createElement("div");
+      card.className = "rounded-xl bg-slate-700/70 p-3";
+      const caption = document.createElement("div");
+      caption.className = "text-xs text-slate-300";
+      caption.textContent = title;
+      const amount = document.createElement("div");
+      amount.className = "font-extrabold text-white mt-2";
+      amount.textContent = Number(value || 0).toLocaleString("en-US", { maximumFractionDigits: 2 }) + suffix;
+      card.append(caption, amount);
+      $("archive-summary").appendChild(card);
+    });
+
+    const tbody = $("archive-tbody");
+    tbody.innerHTML = "";
+    const entries = [...(archive.entries || [])].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    $("archive-empty").classList.toggle("hidden", entries.length > 0);
+    const hourlyRate = Number(totals.hourlyRate ?? (Number(totals.baseSalary || 0) / 26 / 8));
+    const dailyRate = Number(totals.dailyRate ?? (Number(totals.baseSalary || 0) / 26));
+    entries.forEach(item => {
+      let label = "", quantity = "—", multiplier = "—", amount = 0, amountText = "";
+      if (item.kind === "absence") {
+        label = "خصم غياب" + (item.reason ? " - " + item.reason : "");
+        quantity = Number(item.days || 0) + " يوم";
+        multiplier = "26 يوم عمل";
+        amount = -Number(item.days || 0) * dailyRate;
+      } else if (item.kind === "compensation") {
+        label = "تعويض / إضافة" + (item.reason ? " - " + item.reason : "");
+        quantity = item.hours != null ? Number(item.hours || 0) + " ساعة" : "—";
+        multiplier = item.hours != null ? "أجر الساعة" : "—";
+        amount = item.hours != null ? Number(item.hours || 0) * hourlyRate : Number(item.amount || 0);
+      } else if (item.kind === "deduction") {
+        label = "خصم إضافي" + (item.reason ? " - " + item.reason : "");
+        amount = -Number(item.amount || 0);
+      } else {
+        label = item.type === "Morning" ? "☀️ شيفت صباحي" : item.type === "Night" ? "🌙 شيفت مسائي" : "🌌 أوفر نايت";
+        quantity = Number(item.hours || 0) + " ساعة";
+        multiplier = Number(item.multiplier || 1.5) + "x";
+        amount = Number(item.hours || 0) * hourlyRate * Number(item.multiplier || 1.5);
+      }
+      amountText = (amount > 0 ? "+" : "") + amount.toFixed(2) + " ج.م";
+      const tr = document.createElement("tr");
+      [item.date || "—", label, quantity, multiplier, amountText].forEach((value, index) => {
+        const td = document.createElement("td");
+        td.className = "p-3";
+        td.textContent = value;
+        if (index === 4) td.classList.add(amount < 0 ? "text-rose-400" : "text-emerald-400", "font-bold");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function closeActiveMonth() {
+    if (monthArchives[activeMonthKey]) return alert("هذا الشهر موجود بالفعل في الأرشيف.");
+    const currentEntries = shiftLogs.filter(item => monthKeyFromDate(item.date) === activeMonthKey);
+    const otherEntries = shiftLogs.filter(item => monthKeyFromDate(item.date) !== activeMonthKey);
+    if (!confirm("هتقفل شهر " + monthLabel(activeMonthKey) + " وتحفظ كل تفاصيله وإجمالياته، وبعدها تبدأ شهر جديد بسجل فارغ. متأكد؟")) return;
+
+    monthArchives[activeMonthKey] = createMonthArchive(activeMonthKey, currentEntries);
+    shiftLogs = otherEntries;
+    activeMonthKey = nextMonthKey(activeMonthKey);
+    viewingArchiveKey = null;
+    $("archive-details").classList.add("hidden");
+    $("reopen-month-btn").classList.add("hidden");
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    try {
+      await saveQueue;
+      await saveCloudState(false);
+    } catch (err) {
+      console.error("Month archive save failed:", err);
+      alert("تم تجهيز الأرشيف على الشاشة، لكن تعذر تأكيد حفظه على السحابة. راجع اتصال الإنترنت ثم حاول تحديث الصفحة بعد الحفظ.");
+      return;
+    }
+    renderSummaryAndTable();
+    refreshMonthControls();
+    $("entry-date").value = activeMonthKey + "-01";
+    $("adjustment-date").value = activeMonthKey + "-01";
+    alert("تم إقفال الشهر وحفظ أرشيفه بنجاح. بدأت شهر " + monthLabel(activeMonthKey) + ".");
+  }
+
+  async function reopenArchivedMonth() {
+    const key = viewingArchiveKey || $("archive-month-select").value;
+    const archive = monthArchives[key];
+    if (!archive) return alert("اختار شهرًا من الأرشيف أولاً.");
+    if (shiftLogs.length) {
+      return alert("لا يمكن إعادة فتح شهر قديم وفيه سجلات بالشهر النشط. اقفل الشهر النشط أولاً حتى لا تختلط البيانات.");
+    }
+    if (!confirm("إعادة فتح " + monthLabel(key) + " ستنقله من الأرشيف إلى السجل النشط لتعديله. هل تريد المتابعة؟")) return;
+    shiftLogs = (archive.entries || []).map(item => ({ ...item }));
+    activeMonthKey = key;
+    delete monthArchives[key];
+    viewingArchiveKey = null;
+    $("archive-details").classList.add("hidden");
+    $("reopen-month-btn").classList.add("hidden");
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    try {
+      await saveQueue;
+      await saveCloudState(false);
+    } catch (err) {
+      console.error("Month reopen save failed:", err);
+      alert("تعذر تأكيد حفظ إعادة فتح الشهر على السحابة. راجع اتصال الإنترنت قبل مغادرة الصفحة.");
+      return;
+    }
+    renderSummaryAndTable();
+    refreshMonthControls();
+    alert("تمت إعادة فتح الشهر. بعد التصحيح يمكنك إقفاله مرة أخرى.");
+  }
+
   async function loadCloudState() {
     if (!currentUser) throw new Error("لا يوجد حساب مسجل.");
 
@@ -809,7 +1093,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (data) {
       baseSalary = Number(data.base_salary ?? 6000);
       kpiBonus = Number(data.kpi_bonus ?? 500);
-      shiftLogs = Array.isArray(data.shifts) ? data.shifts : [];
+      const savedRows = Array.isArray(data.shifts) ? data.shifts : [];
+      const monthMeta = savedRows.find(item => item && item.kind === "__month_meta__");
+      shiftLogs = savedRows.filter(item => item && item.kind !== "__month_meta__" && item.date);
+      monthArchives = monthMeta && monthMeta.archives && typeof monthMeta.archives === "object"
+        ? monthMeta.archives : {};
+      if (monthMeta && monthMeta.activeMonthKey) {
+        activeMonthKey = monthMeta.activeMonthKey;
+      } else {
+        // ترحيل السجلات القديمة تلقائيًا: الشهور السابقة تصبح أرشيفًا، والشهر الحالي يظل نشطًا.
+        shiftLogs = migrateLegacyMonths(shiftLogs);
+      }
       userAvatar = data.avatar || null;
       isDarkMode = data.theme !== "light";
     } else {
@@ -817,6 +1111,8 @@ document.addEventListener("DOMContentLoaded", () => {
       baseSalary = 6000;
       kpiBonus = 500;
       shiftLogs = [];
+      activeMonthKey = getCurrentMonthKey();
+      monthArchives = {};
       userAvatar = null;
       isDarkMode = true;
 
@@ -834,6 +1130,7 @@ document.addEventListener("DOMContentLoaded", () => {
     applyTheme();
     applyAvatar(userAvatar);
     renderSummaryAndTable();
+    refreshMonthControls();
     updateEntryPreview();
     updateAdjustmentPreview();
   }
@@ -847,7 +1144,15 @@ document.addEventListener("DOMContentLoaded", () => {
       user_id: userId,
       base_salary: baseSalary,
       kpi_bonus: kpiBonus,
-      shifts: shiftLogs,
+      shifts: [
+        ...shiftLogs,
+        {
+          id: "__overshift_month_meta__",
+          kind: "__month_meta__",
+          activeMonthKey,
+          archives: monthArchives
+        }
+      ],
       avatar: userAvatar,
       theme: isDarkMode ? "dark" : "light",
       updated_at: new Date().toISOString()
@@ -984,8 +1289,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const now = new Date();
 
     const today = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-    $("entry-date").value = today;
-    $("adjustment-date").value = today;
+    const defaultDate = activeMonthKey === today.slice(0, 7) ? today : activeMonthKey + "-01";
+    $("entry-date").value = defaultDate;
+    $("adjustment-date").value = defaultDate;
   }
 
   function calculateRates() {
@@ -1120,10 +1426,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderSummaryAndTable() {
     const { dailyRate, hourlyRate } = calculateRates();
-    const normalShifts = shiftLogs.filter(item => !item.kind || item.kind === "shift");
-    const compensationEntries = shiftLogs.filter(item => item.kind === "compensation");
-    const deductionEntries = shiftLogs.filter(item => item.kind === "deduction");
-    const absenceEntries = shiftLogs.filter(item => item.kind === "absence");
+    refreshMonthControls();
+    const activeEntries = shiftLogs.filter(item => monthKeyFromDate(item.date) === activeMonthKey);
+    const normalShifts = activeEntries.filter(item => !item.kind || item.kind === "shift");
+    const compensationEntries = activeEntries.filter(item => item.kind === "compensation");
+    const deductionEntries = activeEntries.filter(item => item.kind === "deduction");
+    const absenceEntries = activeEntries.filter(item => item.kind === "absence");
     renderAnalytics(normalShifts);
 
     let totalPay = 0;
@@ -1167,13 +1475,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const empty = $("empty-state");
     tbody.innerHTML = "";
 
-    if (!shiftLogs.length) {
+    const tableEntries = shiftLogs.filter(item => monthKeyFromDate(item.date) === activeMonthKey);
+    if (!tableEntries.length) {
       empty.classList.remove("hidden");
       return;
     }
     empty.classList.add("hidden");
 
-    [...shiftLogs].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(item => {
+    [...tableEntries].sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(item => {
       let label, hoursText, multiplierText, amountText, amountClass = "text-emerald-500 font-bold";
       if (item.kind === "absence") {
         const amount = Number(item.days || 0) * dailyRate;
@@ -1254,6 +1563,10 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("اختر تاريخ الشيفت.");
       return;
     }
+    if (monthKeyFromDate($("entry-date").value) !== activeMonthKey) {
+      alert("التسجيل مسموح داخل الشهر النشط فقط: " + monthLabel(activeMonthKey));
+      return;
+    }
 
     shiftLogs.push({
       id: crypto.randomUUID
@@ -1321,6 +1634,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const kind = $("adjustment-kind").value;
     const date = $("adjustment-date").value;
     if (!date) return alert("اختر تاريخ الحركة.");
+    if (monthKeyFromDate(date) !== activeMonthKey) {
+      return alert("تسجيل الخصومات والتعويضات مسموح داخل الشهر النشط فقط: " + monthLabel(activeMonthKey));
+    }
 
     const record = {
       id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
@@ -1376,14 +1692,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   $("clear-all-btn").addEventListener("click", () => {
-    if (!shiftLogs.length) return;
+    const activeEntries = shiftLogs.filter(item => monthKeyFromDate(item.date) === activeMonthKey);
+    if (!activeEntries.length) return;
 
-    if (!confirm("متأكد إنك عايز تمسح كل السجل، بما فيه الشيفتات والتعويضات والخصومات والغياب؟")) return;
+    if (!confirm("متأكد إنك عايز تمسح سجل الشهر النشط فقط؟ الأرشيفات المقفولة لن تتأثر.")) return;
 
-    shiftLogs = [];
+    shiftLogs = shiftLogs.filter(item => monthKeyFromDate(item.date) !== activeMonthKey);
     saveState();
     renderSummaryAndTable();
   });
+
+  $("close-month-btn").addEventListener("click", closeActiveMonth);
+  $("view-archive-btn").addEventListener("click", () => {
+    const key = $("archive-month-select").value;
+    if (!key) return alert("اختار شهرًا من الأرشيف أولاً.");
+    showArchive(key);
+  });
+  $("archive-month-select").addEventListener("change", () => {
+    viewingArchiveKey = $("archive-month-select").value || null;
+    if (!viewingArchiveKey) {
+      $("archive-details").classList.add("hidden");
+      $("reopen-month-btn").classList.add("hidden");
+    }
+  });
+  $("reopen-month-btn").addEventListener("click", reopenArchivedMonth);
 
   // فحص جلسة الدخول عند فتح الموقع
   async function initializeApp() {
